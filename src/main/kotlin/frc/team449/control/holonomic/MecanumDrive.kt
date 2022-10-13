@@ -1,6 +1,8 @@
 package frc.team449.control.holonomic
 
 import com.kauailabs.navx.frc.AHRS
+import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
@@ -21,38 +23,43 @@ class MecanumDrive(
   val ahrs: AHRS,
   override var pose: Pose2d,
   override val maxLinearSpeed: Double,
-  override val maxRotSpeed: Double
+  override val maxRotSpeed: Double,
+  private val feedForward: SimpleMotorFeedforward,
+  private val controller: PIDController
 ): HolonomicDrive, SubsystemBase() {
-  // 10.500 x, 10.713 y (outreach 2022)
-  /*
-    speed = sqrt(joystickX^2+joystickY^2) * maxSpeed
-    theta = arctan(joystickY/joystickX)
-    motors are numbers clockwise from top left
-    motors fl,br = speed * sin(theta-45)
-    motors fr,bl = speed * cos(theta-45)
-   */
+  // 10.500 x, 10.713 y (outreach 2022) (in)
 
   private val kinematics = MecanumDriveKinematics(
     frontLeftLocation, frontRightLocation, backLeftLocation, backRightLocation
   )
 
-  private var wheelSpeeds = MecanumDriveWheelSpeeds()
+  private var desiredWheelSpeeds = MecanumDriveWheelSpeeds()
+  private var disabledChassisSpeeds = ChassisSpeeds(0.0, 0.0, 0.0)
 
   override fun set(desiredSpeeds: ChassisSpeeds) {
-    wheelSpeeds = kinematics.toWheelSpeeds(desiredSpeeds)
-    wheelSpeeds.desaturate(this.maxLinearSpeed)
-    frontLeftMotor.setVoltage(wheelSpeeds.frontLeftMetersPerSecond)
-    frontRightMotor.setVoltage(wheelSpeeds.frontRightMetersPerSecond)
-    backLeftMotor.setVoltage(wheelSpeeds.rearLeftMetersPerSecond)
-    backRightMotor.setVoltage(wheelSpeeds.rearRightMetersPerSecond)
+    desiredWheelSpeeds = kinematics.toWheelSpeeds(desiredSpeeds)
+    desiredWheelSpeeds.desaturate(this.maxLinearSpeed)
   }
 
   override fun stop() {
-    this.set(ChassisSpeeds(0.0, 0.0, 0.0))
+    this.set(disabledChassisSpeeds)
   }
 
   override fun periodic() {
+    val FLPID = controller.calculate(frontLeftMotor.velocity)
+    val FRPID = controller.calculate(frontRightMotor.velocity)
+    val BLPID = controller.calculate(backLeftMotor.velocity)
+    val BRPID = controller.calculate(backRightMotor.velocity)
 
+    val FLFF = feedForward.calculate(desiredWheelSpeeds.frontLeftMetersPerSecond)
+    val FRFF = feedForward.calculate(desiredWheelSpeeds.frontRightMetersPerSecond)
+    val BLFF = feedForward.calculate(desiredWheelSpeeds.rearLeftMetersPerSecond)
+    val BRFF = feedForward.calculate(desiredWheelSpeeds.rearRightMetersPerSecond)
+
+    frontLeftMotor.setVoltage(FLPID + FLFF)
+    frontRightMotor.setVoltage(FRPID + FRFF)
+    backLeftMotor.setVoltage(BLPID + BLFF)
+    backRightMotor.setVoltage(BRPID + BRFF)
   }
 
 }
