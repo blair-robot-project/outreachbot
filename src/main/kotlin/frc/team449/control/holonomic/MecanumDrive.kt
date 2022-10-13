@@ -18,7 +18,6 @@ class MecanumDrive(
   private val frontRightLocation: Translation2d,
   private val backLeftLocation: Translation2d,
   private val backRightLocation: Translation2d,
-  val ahrs: AHRS,
   override var pose: Pose2d,
   override val maxLinearSpeed: Double,
   override val maxRotSpeed: Double
@@ -41,6 +40,7 @@ class MecanumDrive(
   override fun set(desiredSpeeds: ChassisSpeeds) {
     wheelSpeeds = kinematics.toWheelSpeeds(desiredSpeeds)
     wheelSpeeds.desaturate(this.maxLinearSpeed)
+    // could be set instead of setVoltage
     frontLeftMotor.setVoltage(wheelSpeeds.frontLeftMetersPerSecond)
     frontRightMotor.setVoltage(wheelSpeeds.frontRightMetersPerSecond)
     backLeftMotor.setVoltage(wheelSpeeds.rearLeftMetersPerSecond)

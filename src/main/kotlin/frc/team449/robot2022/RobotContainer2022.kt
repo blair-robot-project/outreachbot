@@ -3,6 +3,8 @@ package frc.team449.robot2022
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.filter.SlewRateLimiter
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.SerialPort
@@ -10,6 +12,7 @@ import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import frc.team449.RobotContainerBase
 import frc.team449.control.auto.AutoRoutine
+import frc.team449.control.holonomic.MecanumDrive
 import frc.team449.control.holonomic.OIHolonomic
 import frc.team449.control.holonomic.SwerveDrive
 import frc.team449.robot2022.auto.Example
@@ -35,13 +38,20 @@ class RobotContainer2022() : RobotContainerBase() {
 
   override val powerDistribution: PowerDistribution = PowerDistribution(PDP_CAN, PowerDistribution.ModuleType.kCTRE)
 
-  /**
-   * Converts the drive to a SwerveSim if the robot is in simulation
-   */
   @Log.Include
-  override val drive = if (isReal()) createDrivetrain() else SwerveDrive.simOf(createDrivetrain())
-
-  override val autoChooser = addRoutines()
+  override val drive = MecanumDrive(
+    createSparkMax("frontLeft" ,0, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
+    createSparkMax("frontRight" ,1, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
+    createSparkMax("backLeft" ,2, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
+    createSparkMax("backRight" ,3, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
+    Translation2d(10.500, -10.713),
+    Translation2d(10.500, 10.713),
+    Translation2d(-10.500, 10.713),
+    Translation2d(-10.500, -10.713),
+    Pose2d(),
+    DriveConstants.MAX_LINEAR_SPEED,
+    DriveConstants.MAX_ROT_SPEED
+  )
 
   override val oi = OIHolonomic(
     drive,
@@ -53,109 +63,10 @@ class RobotContainer2022() : RobotContainerBase() {
     { true }
   )
 
-  /** Helper to make turning motors for swerve */
-  private fun makeDrivingMotor(
-    name: String,
-    motorId: Int,
-    inverted: Boolean
-  ) =
-    createSparkMax(
-      name = name + "Drive",
-      id = motorId,
-      enableBrakeMode = true,
-      inverted = inverted,
-      encCreator =
-      NEOEncoder.creator(
-        DriveConstants.DRIVE_UPR,
-        DriveConstants.DRIVE_GEARING
-      )
-    )
+  override val autoChooser = addRoutines()
 
-  /** Helper to make turning motors for swerve */
-  private fun makeTurningMotor(
-    name: String,
-    motorId: Int,
-    inverted: Boolean,
-    sensorPhase: Boolean,
-    encoderChannel: Int,
-    offset: Double
-  ) =
-    createSparkMax(
-      name = name + "Turn",
-      id = motorId,
-      enableBrakeMode = true,
-      inverted = inverted,
-      encCreator = AbsoluteEncoder.creator(
-        encoderChannel,
-        offset,
-        DriveConstants.TURN_UPR,
-        sensorPhase
-      )
-    )
 
-  private fun createDrivetrain() =
-    SwerveDrive.swerveDrive(
-      ahrs,
-      DriveConstants.MAX_LINEAR_SPEED,
-      DriveConstants.MAX_ROT_SPEED,
-      makeDrivingMotor(
-        "FL",
-        DriveConstants.DRIVE_MOTOR_FL,
-        false
-      ),
-      makeDrivingMotor(
-        "FR",
-        DriveConstants.DRIVE_MOTOR_FR,
-        false
-      ),
-      makeDrivingMotor(
-        "BL",
-        DriveConstants.DRIVE_MOTOR_BL,
-        false
-      ),
-      makeDrivingMotor(
-        "BR",
-        DriveConstants.DRIVE_MOTOR_BR,
-        false
-      ),
-      makeTurningMotor(
-        "FL",
-        DriveConstants.TURN_MOTOR_FL,
-        true,
-        false,
-        DriveConstants.TURN_ENC_CHAN_FL,
-        DriveConstants.TURN_ENC_OFFSET_FL
-      ),
-      makeTurningMotor(
-        "FR",
-        DriveConstants.TURN_MOTOR_FR,
-        true,
-        false,
-        DriveConstants.TURN_ENC_CHAN_FR,
-        DriveConstants.TURN_ENC_OFFSET_FR
-      ),
-      makeTurningMotor(
-        "BL",
-        DriveConstants.TURN_MOTOR_BL,
-        true,
-        false,
-        DriveConstants.TURN_ENC_CHAN_BL,
-        DriveConstants.TURN_ENC_OFFSET_BL
-      ),
-      makeTurningMotor(
-        "BR",
-        DriveConstants.TURN_MOTOR_BR,
-        true,
-        false,
-        DriveConstants.TURN_ENC_CHAN_BR,
-        DriveConstants.TURN_ENC_OFFSET_BR
-      ),
-      DriveConstants.WHEELBASE,
-      DriveConstants.TRACKWIDTH,
-      { PIDController(DriveConstants.DRIVE_KP, DriveConstants.DRIVE_KI, DriveConstants.DRIVE_KD) },
-      { PIDController(DriveConstants.TURN_KP, DriveConstants.TURN_KI, DriveConstants.TURN_KD) },
-      SimpleMotorFeedforward(DriveConstants.DRIVE_KS, DriveConstants.DRIVE_KV, DriveConstants.DRIVE_KA)
-    )
+
 
   private fun addRoutines(): SendableChooser<AutoRoutine> {
     val chooser = SendableChooser<AutoRoutine>()
