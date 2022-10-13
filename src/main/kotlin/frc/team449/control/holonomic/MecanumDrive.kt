@@ -1,5 +1,6 @@
 package frc.team449.control.holonomic
 
+import com.kauailabs.navx.frc.AHRS
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
@@ -17,6 +18,7 @@ class MecanumDrive(
   private val frontRightLocation: Translation2d,
   private val backLeftLocation: Translation2d,
   private val backRightLocation: Translation2d,
+  val ahrs: AHRS,
   override var pose: Pose2d,
   override val maxLinearSpeed: Double,
   override val maxRotSpeed: Double
@@ -29,18 +31,28 @@ class MecanumDrive(
     motors fl,br = speed * sin(theta-45)
     motors fr,bl = speed * cos(theta-45)
    */
+
   private val kinematics = MecanumDriveKinematics(
     frontLeftLocation, frontRightLocation, backLeftLocation, backRightLocation
   )
 
-  private var desiredSpeeds = ChassisSpeeds()
+  private var wheelSpeeds = MecanumDriveWheelSpeeds()
 
   override fun set(desiredSpeeds: ChassisSpeeds) {
-    this.desiredSpeeds = desiredSpeeds
+    wheelSpeeds = kinematics.toWheelSpeeds(desiredSpeeds)
+    wheelSpeeds.desaturate(this.maxLinearSpeed)
+    frontLeftMotor.setVoltage(wheelSpeeds.frontLeftMetersPerSecond)
+    frontRightMotor.setVoltage(wheelSpeeds.frontRightMetersPerSecond)
+    backLeftMotor.setVoltage(wheelSpeeds.rearLeftMetersPerSecond)
+    backRightMotor.setVoltage(wheelSpeeds.rearRightMetersPerSecond)
   }
 
   override fun stop() {
-    this.desiredSpeeds = ChassisSpeeds(0.0, 0.0, 0.0)
+    this.set(ChassisSpeeds(0.0, 0.0, 0.0))
+  }
+
+  override fun periodic() {
+
   }
 
 }
