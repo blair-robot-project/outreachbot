@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.SerialPort
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
+import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import frc.team449.RobotContainerBase
 import frc.team449.control.auto.AutoRoutine
 import frc.team449.robot2022.auto.Example
@@ -57,6 +58,7 @@ class RobotContainer2022() : RobotContainerBase() {
         sensorPhase
       )
     )
+  //
 
   private fun addRoutines(): SendableChooser<AutoRoutine> {
     val chooser = SendableChooser<AutoRoutine>()
@@ -67,6 +69,11 @@ class RobotContainer2022() : RobotContainerBase() {
 
   override fun teleopInit() {
     // todo Add button bindings here
+    // how to create a button
+    JoystickButton(
+      driveController,
+      XboxController.Button.kStart.value
+    )
   }
 
   override fun robotPeriodic() {
