@@ -1,12 +1,9 @@
 package frc.team449.robot2022
 
-import edu.wpi.first.math.controller.PIDController
-import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.filter.SlewRateLimiter
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.wpilibj.PowerDistribution
-import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.SerialPort
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
@@ -14,11 +11,9 @@ import frc.team449.RobotContainerBase
 import frc.team449.control.auto.AutoRoutine
 import frc.team449.control.holonomic.MecanumDrive
 import frc.team449.control.holonomic.OIHolonomic
-import frc.team449.control.holonomic.SwerveDrive
 import frc.team449.robot2022.auto.Example
 import frc.team449.robot2022.drive.DriveConstants
 import frc.team449.system.AHRS
-import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.NEOEncoder
 import frc.team449.system.motor.createSparkMax
 import io.github.oblarg.oblog.annotations.Log
@@ -40,10 +35,10 @@ class RobotContainer2022() : RobotContainerBase() {
 
   @Log.Include
   override val drive = MecanumDrive(
-    createSparkMax("frontLeft" ,0, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
-    createSparkMax("frontRight" ,1, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
-    createSparkMax("backLeft" ,2, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
-    createSparkMax("backRight" ,3, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
+    createSparkMax("frontLeft", 0, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
+    createSparkMax("frontRight", 1, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
+    createSparkMax("backLeft", 2, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
+    createSparkMax("backRight", 3, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
     Translation2d(10.500, -10.713),
     Translation2d(10.500, 10.713),
     Translation2d(-10.500, 10.713),
@@ -64,9 +59,6 @@ class RobotContainer2022() : RobotContainerBase() {
   )
 
   override val autoChooser = addRoutines()
-
-
-
 
   private fun addRoutines(): SendableChooser<AutoRoutine> {
     val chooser = SendableChooser<AutoRoutine>()
