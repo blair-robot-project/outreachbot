@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import frc.team449.RobotContainerBase
 import frc.team449.control.auto.AutoRoutine
 import frc.team449.control.holonomic.MecanumDrive
+import frc.team449.control.holonomic.MecanumDrive.Companion.createMecanum
 import frc.team449.control.holonomic.OIHolonomic
 import frc.team449.control.holonomic.SwerveDrive
 import frc.team449.robot2022.auto.Example
@@ -39,18 +40,18 @@ class RobotContainer2022() : RobotContainerBase() {
   override val powerDistribution: PowerDistribution = PowerDistribution(PDP_CAN, PowerDistribution.ModuleType.kCTRE)
 
   @Log.Include
-  override val drive = MecanumDrive(
+  override val drive = createMecanum(
     createSparkMax("frontLeft" ,0, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
     createSparkMax("frontRight" ,1, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
     createSparkMax("backLeft" ,2, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
     createSparkMax("backRight" ,3, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
-    Translation2d(10.500, -10.713),
-    Translation2d(10.500, 10.713),
-    Translation2d(-10.500, 10.713),
-    Translation2d(-10.500, -10.713),
+    21.000,
+    21.426,
     Pose2d(),
     DriveConstants.MAX_LINEAR_SPEED,
-    DriveConstants.MAX_ROT_SPEED
+    DriveConstants.MAX_ROT_SPEED,
+    SimpleMotorFeedforward(DriveConstants.DRIVE_KS, DriveConstants.DRIVE_KV, DriveConstants.DRIVE_KA),
+    PIDController(DriveConstants.DRIVE_KP, DriveConstants.DRIVE_KI, DriveConstants.DRIVE_KD)
   )
 
   override val oi = OIHolonomic(
@@ -64,9 +65,6 @@ class RobotContainer2022() : RobotContainerBase() {
   )
 
   override val autoChooser = addRoutines()
-
-
-
 
   private fun addRoutines(): SendableChooser<AutoRoutine> {
     val chooser = SendableChooser<AutoRoutine>()

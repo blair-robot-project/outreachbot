@@ -20,7 +20,6 @@ class MecanumDrive(
   private val frontRightLocation: Translation2d,
   private val backLeftLocation: Translation2d,
   private val backRightLocation: Translation2d,
-  val ahrs: AHRS,
   override var pose: Pose2d,
   override val maxLinearSpeed: Double,
   override val maxRotSpeed: Double,
@@ -62,4 +61,35 @@ class MecanumDrive(
     backRightMotor.setVoltage(BRPID + BRFF)
   }
 
+  companion object {
+    fun createMecanum(
+      frontLeftMotor: WrappedMotor,
+      frontRightMotor: WrappedMotor,
+      backLeftMotor: WrappedMotor,
+      backRightMotor: WrappedMotor,
+      trackwitdh: Double,
+      length: Double,
+      pose: Pose2d,
+      maxLinearSpeed: Double,
+      maxRotSpeed: Double,
+      feedForward: SimpleMotorFeedforward,
+      controller: PIDController
+      ): MecanumDrive{
+      return MecanumDrive(
+        frontLeftMotor,
+        frontRightMotor,
+        backLeftMotor,
+        backRightMotor,
+        Translation2d(-length/2, trackwitdh/2),
+        Translation2d(length/2, trackwitdh/2),
+        Translation2d(length/2, -trackwitdh/2),
+        Translation2d(-length/2, -trackwitdh/2),
+        pose,
+        maxLinearSpeed,
+        maxRotSpeed,
+        feedForward,
+        controller
+      )
+    }
+  }
 }
