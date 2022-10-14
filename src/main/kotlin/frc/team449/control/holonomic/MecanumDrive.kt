@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds
+import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.system.motor.WrappedMotor
 
@@ -35,7 +36,7 @@ class MecanumDrive(
 
   private var desiredWheelSpeeds = MecanumDriveWheelSpeeds()
   private var disabledChassisSpeeds = ChassisSpeeds(0.0, 0.0, 0.0)
-
+  private var prevTime = Double.NaN
   override fun set(desiredSpeeds: ChassisSpeeds) {
     desiredWheelSpeeds = kinematics.toWheelSpeeds(desiredSpeeds)
     desiredWheelSpeeds.desaturate(this.maxLinearSpeed)
@@ -46,37 +47,45 @@ class MecanumDrive(
   }
 
   override fun periodic() {
+    val currTime = Timer.getFPGATimestamp()
+    if (prevTime.isNaN()) {
+      prevTime = currTime - 0.02
+    }
+    val dtSec = currTime - prevTime
+
     val FLPID = controller.calculate(frontLeftMotor.velocity)
     val FRPID = controller.calculate(frontRightMotor.velocity)
     val BLPID = controller.calculate(backLeftMotor.velocity)
     val BRPID = controller.calculate(backRightMotor.velocity)
 
-    //TODO actually calculate dtSeconds
     val FLFF = feedForward.calculate(
       frontLeftMotor.velocity,
       desiredWheelSpeeds.frontLeftMetersPerSecond,
-      0.02
+      dtSec
     )
     val FRFF = feedForward.calculate(
       frontRightMotor.velocity,
       desiredWheelSpeeds.frontRightMetersPerSecond,
-      0.02
+      dtSec
     )
     val BLFF = feedForward.calculate(
       backLeftMotor.velocity,
       desiredWheelSpeeds.rearLeftMetersPerSecond,
-      0.02
+      dtSec
     )
     val BRFF = feedForward.calculate(
       backRightMotor.velocity,
       desiredWheelSpeeds.rearRightMetersPerSecond,
-      0.02
+      dtSec
     )
 
     frontLeftMotor.setVoltage(FLPID + FLFF)
     frontRightMotor.setVoltage(FRPID + FRFF)
     backLeftMotor.setVoltage(BLPID + BLFF)
     backRightMotor.setVoltage(BRPID + BRFF)
+
+    prevTime = currTime
+
   }
 
   companion object {
