@@ -16,17 +16,18 @@ class MecanumDrive(
   private val frontRightMotor: WrappedMotor,
   private val backLeftMotor: WrappedMotor,
   private val backRightMotor: WrappedMotor,
-  private val frontLeftLocation: Translation2d,
-  private val frontRightLocation: Translation2d,
-  private val backLeftLocation: Translation2d,
-  private val backRightLocation: Translation2d,
+  frontLeftLocation: Translation2d,
+  frontRightLocation: Translation2d,
+  backLeftLocation: Translation2d,
+  backRightLocation: Translation2d,
   override var pose: Pose2d,
   override val maxLinearSpeed: Double,
   override val maxRotSpeed: Double,
   private val feedForward: SimpleMotorFeedforward,
   private val controller: PIDController
 ) : HolonomicDrive, SubsystemBase() {
-  // 10.500 x, 10.713 y (outreach 2022) (in)
+
+  // 10.500 x, 10.713 y (outreach 2022) (in.) (top right) (y is horizontal axis)
 
   private val kinematics = MecanumDriveKinematics(
     frontLeftLocation, frontRightLocation, backLeftLocation, backRightLocation
@@ -50,10 +51,27 @@ class MecanumDrive(
     val BLPID = controller.calculate(backLeftMotor.velocity)
     val BRPID = controller.calculate(backRightMotor.velocity)
 
-    val FLFF = feedForward.calculate(frontLeftMotor.velocity, desiredWheelSpeeds.frontLeftMetersPerSecond, 0.02)
-    val FRFF = feedForward.calculate(frontRightMotor.velocity, desiredWheelSpeeds.frontRightMetersPerSecond, 0.02)
-    val BLFF = feedForward.calculate(backLeftMotor.velocity, desiredWheelSpeeds.rearLeftMetersPerSecond, 0.02)
-    val BRFF = feedForward.calculate(backRightMotor.velocity, desiredWheelSpeeds.rearRightMetersPerSecond, 0.02)
+    //TODO actually calculate dtSeconds
+    val FLFF = feedForward.calculate(
+      frontLeftMotor.velocity,
+      desiredWheelSpeeds.frontLeftMetersPerSecond,
+      0.02
+    )
+    val FRFF = feedForward.calculate(
+      frontRightMotor.velocity,
+      desiredWheelSpeeds.frontRightMetersPerSecond,
+      0.02
+    )
+    val BLFF = feedForward.calculate(
+      backLeftMotor.velocity,
+      desiredWheelSpeeds.rearLeftMetersPerSecond,
+      0.02
+    )
+    val BRFF = feedForward.calculate(
+      backRightMotor.velocity,
+      desiredWheelSpeeds.rearRightMetersPerSecond,
+      0.02
+    )
 
     frontLeftMotor.setVoltage(FLPID + FLFF)
     frontRightMotor.setVoltage(FRPID + FRFF)
@@ -61,7 +79,7 @@ class MecanumDrive(
     backRightMotor.setVoltage(BRPID + BRFF)
   }
 
-  companion object{
+  companion object {
     fun createMecanum(
       frontLeftMotor: WrappedMotor,
       frontRightMotor: WrappedMotor,
@@ -74,7 +92,7 @@ class MecanumDrive(
       maxRotSpeed: Double,
       feedForward: SimpleMotorFeedforward,
       controller: PIDController
-    ): MecanumDrive{
+    ): MecanumDrive {
       return MecanumDrive(
         frontLeftMotor,
         frontRightMotor,
