@@ -27,6 +27,9 @@ class MecanumDrive(
   private val feedForward: SimpleMotorFeedforward,
   private val controller: PIDController
 ) : HolonomicDrive, SubsystemBase() {
+  init {
+    controller.reset()
+  }
 
   // 10.500 x, 10.713 y (outreach 2022) (in.) (top right) (y is horizontal axis)
 
