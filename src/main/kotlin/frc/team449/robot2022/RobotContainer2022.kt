@@ -3,14 +3,18 @@ package frc.team449.robot2022
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.SerialPort
 import edu.wpi.first.wpilibj.XboxController
+import edu.wpi.first.wpilibj.motorcontrol.MotorController
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import frc.team449.RobotContainerBase
 import frc.team449.control.auto.AutoRoutine
 import frc.team449.robot2022.auto.Example
 import frc.team449.robot2022.drive.DriveConstants
+import frc.team449.robot2022.intake.Intake
 import frc.team449.system.AHRS
 import frc.team449.system.encoder.AbsoluteEncoder
+import frc.team449.system.encoder.Encoder
+import frc.team449.system.motor.WrappedMotor
 import frc.team449.system.motor.createSparkMax
 import io.github.oblarg.oblog.annotations.Log
 
@@ -34,6 +38,14 @@ class RobotContainer2022() : RobotContainerBase() {
   @Log.Include
 
   override val autoChooser = addRoutines()
+
+  val name: String = "intakeMotor"
+  val motorController: MotorController = TODO()
+  val encoder: Encoder = TODO()
+
+  val intakeMotor = WrappedMotor("intakeMotor", motorController, encoder)
+
+
 
   /** Helper to make turning motors for swerve */
 
@@ -69,7 +81,6 @@ class RobotContainer2022() : RobotContainerBase() {
 
   override fun teleopInit() {
     // todo Add button bindings here
-    // how to create a button
     JoystickButton(
       driveController,
       XboxController.Button.kStart.value
