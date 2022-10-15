@@ -12,6 +12,21 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.system.motor.WrappedMotor
 
+/**
+ * @param frontLeftMotor the front left motor
+ * @param frontRightMotor the front right motor
+ * @param backLeftMotor the back left motor
+ * @param backRightMotor the back right motor
+ * @param frontLeftLocation the offset of the front left wheel to the center of the robot
+ * @param frontRightLocation the offset of the front right wheel to the center of the robot
+ * @param backLeftLocation the offset of the back left wheel to the center of the robot
+ * @param backRightLocation the offset of the back right wheel to the center of the robot
+ * @param pose the (x,y) position of the robot (unused i think)
+ * @param maxLinearSpeed the maximum translation speed of the chassis.
+ * @param maxRotSpeed the maximum rotation speed of the chassis
+ * @param feedForward the SimpleMotorFeedforward for the robot
+ * @param controller the PIDController for the robot
+ */
 class MecanumDrive(
   private val frontLeftMotor: WrappedMotor,
   private val frontRightMotor: WrappedMotor,
@@ -92,6 +107,22 @@ class MecanumDrive(
   }
 
   companion object {
+    /**
+     *
+     * Create a new Mecanum Drive
+     *
+     * @param frontLeftMotor the front left motor
+     * @param frontRightMotor the front right motor
+     * @param backLeftMotor the back left motor
+     * @param backRightMotor the back right motor
+     * @param trackwidth the distance from a back wheel to a front wheel
+     * @param length the distance form a left wheel to the right
+     * @param pose the (x,y) position of the robot (unused i think)
+     * @param maxLinearSpeed the maximum translation speed of the chassis.
+     * @param maxRotSpeed the maximum rotation speed of the chassis
+     * @param feedForward the SimpleMotorFeedforward for the robot
+     * @param controller the PIDController for the robot
+     */
     fun createMecanum(
       frontLeftMotor: WrappedMotor,
       frontRightMotor: WrappedMotor,
