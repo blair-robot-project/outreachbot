@@ -1,16 +1,22 @@
 package frc.team449.control.holonomic
 
-import com.kauailabs.navx.frc.AHRS
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics
+import edu.wpi.first.math.kinematics.MecanumDriveOdometry
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.team449.robot2022.drive.DriveConstants
+import frc.team449.system.AHRS
+import frc.team449.system.encoder.NEOEncoder
 import frc.team449.system.motor.WrappedMotor
+import frc.team449.system.motor.createSparkMax
+import io.github.oblarg.oblog.annotations.Log
 
 /**
  * @param frontLeftMotor the front left motor
@@ -21,7 +27,6 @@ import frc.team449.system.motor.WrappedMotor
  * @param frontRightLocation the offset of the front right wheel to the center of the robot
  * @param backLeftLocation the offset of the back left wheel to the center of the robot
  * @param backRightLocation the offset of the back right wheel to the center of the robot
- * @param pose the (x,y) position of the robot (unused i think)
  * @param maxLinearSpeed the maximum translation speed of the chassis.
  * @param maxRotSpeed the maximum rotation speed of the chassis
  * @param feedForward the SimpleMotorFeedforward for the robot
@@ -36,7 +41,7 @@ class MecanumDrive(
   frontRightLocation: Translation2d,
   backLeftLocation: Translation2d,
   backRightLocation: Translation2d,
-  override var pose: Pose2d,
+  private val ahrs: AHRS,
   override val maxLinearSpeed: Double,
   override val maxRotSpeed: Double,
   private val feedForward: SimpleMotorFeedforward,
@@ -44,6 +49,8 @@ class MecanumDrive(
 ) : HolonomicDrive, SubsystemBase() {
   init {
     controller.reset()
+    ahrs.calibrate()
+    ahrs.reset()
   }
 
   // 10.500 x, 10.713 y (outreach 2022) (in.) (top right) (y is horizontal axis)
@@ -51,6 +58,22 @@ class MecanumDrive(
   private val kinematics = MecanumDriveKinematics(
     frontLeftLocation, frontRightLocation, backLeftLocation, backRightLocation
   )
+
+  private val odometry = MecanumDriveOdometry(kinematics, -ahrs.heading)
+
+  override val heading: Rotation2d
+    get() {
+      return -ahrs.heading
+    }
+
+  override var pose: Pose2d
+    @Log.ToString
+    get() {
+      return this.odometry.poseMeters
+    }
+    set(value) {
+      this.odometry.resetPosition(value, heading)
+    }
 
   private var desiredWheelSpeeds = MecanumDriveWheelSpeeds()
   private var disabledChassisSpeeds = ChassisSpeeds(0.0, 0.0, 0.0)
@@ -71,85 +94,67 @@ class MecanumDrive(
     }
     val dtSec = currTime - prevTime
 
-    val FLPID = controller.calculate(frontLeftMotor.velocity)
-    val FRPID = controller.calculate(frontRightMotor.velocity)
-    val BLPID = controller.calculate(backLeftMotor.velocity)
-    val BRPID = controller.calculate(backRightMotor.velocity)
+    val frontLeftPID = controller.calculate(frontLeftMotor.velocity)
+    val frontRightPID = controller.calculate(frontRightMotor.velocity)
+    val backLeftPID = controller.calculate(backLeftMotor.velocity)
+    val backRightPID = controller.calculate(backRightMotor.velocity)
 
-    val FLFF = feedForward.calculate(
+    val frontLeftFF = feedForward.calculate(
       frontLeftMotor.velocity,
       desiredWheelSpeeds.frontLeftMetersPerSecond,
       dtSec
     )
-    val FRFF = feedForward.calculate(
+    val frontRightFF = feedForward.calculate(
       frontRightMotor.velocity,
       desiredWheelSpeeds.frontRightMetersPerSecond,
       dtSec
     )
-    val BLFF = feedForward.calculate(
+    val backLeftFF = feedForward.calculate(
       backLeftMotor.velocity,
       desiredWheelSpeeds.rearLeftMetersPerSecond,
       dtSec
     )
-    val BRFF = feedForward.calculate(
+    val backRightFF = feedForward.calculate(
       backRightMotor.velocity,
       desiredWheelSpeeds.rearRightMetersPerSecond,
       dtSec
     )
 
-    frontLeftMotor.setVoltage(FLPID + FLFF)
-    frontRightMotor.setVoltage(FRPID + FRFF)
-    backLeftMotor.setVoltage(BLPID + BLFF)
-    backRightMotor.setVoltage(BRPID + BRFF)
+    frontLeftMotor.setVoltage(frontLeftPID + frontLeftFF)
+    frontRightMotor.setVoltage(frontRightPID + frontRightFF)
+    backLeftMotor.setVoltage(backLeftPID + backLeftFF)
+    backRightMotor.setVoltage(backRightPID + backRightFF)
+
+    this.odometry.update(
+      heading,
+      MecanumDriveWheelSpeeds(
+        frontLeftMotor.velocity,
+        frontRightMotor.velocity,
+        backLeftMotor.velocity,
+        backRightMotor.velocity
+      )
+    )
 
     prevTime = currTime
-
   }
 
   companion object {
-    /**
-     *
-     * Create a new Mecanum Drive
-     *
-     * @param frontLeftMotor the front left motor
-     * @param frontRightMotor the front right motor
-     * @param backLeftMotor the back left motor
-     * @param backRightMotor the back right motor
-     * @param trackwidth the distance from a back wheel to a front wheel
-     * @param length the distance form a left wheel to the right
-     * @param pose the (x,y) position of the robot (unused i think)
-     * @param maxLinearSpeed the maximum translation speed of the chassis.
-     * @param maxRotSpeed the maximum rotation speed of the chassis
-     * @param feedForward the SimpleMotorFeedforward for the robot
-     * @param controller the PIDController for the robot
-     */
-    fun createMecanum(
-      frontLeftMotor: WrappedMotor,
-      frontRightMotor: WrappedMotor,
-      backLeftMotor: WrappedMotor,
-      backRightMotor: WrappedMotor,
-      trackwidth: Double,
-      length: Double,
-      pose: Pose2d,
-      maxLinearSpeed: Double,
-      maxRotSpeed: Double,
-      feedForward: SimpleMotorFeedforward,
-      controller: PIDController
-    ): MecanumDrive {
+    /** Create a new Mecanum Drive using constants from DriveConstants */
+    fun createMecanum(ahrs: AHRS): MecanumDrive {
       return MecanumDrive(
-        frontLeftMotor,
-        frontRightMotor,
-        backLeftMotor,
-        backRightMotor,
-        Translation2d(-length/2, trackwidth/2),
-        Translation2d(length/2, trackwidth/2),
-        Translation2d(length/2, -trackwidth/2),
-        Translation2d(-length/2, -trackwidth/2),
-        pose,
-        maxLinearSpeed,
-        maxRotSpeed,
-        feedForward,
-        controller
+        createSparkMax("frontLeft", DriveConstants.DRIVE_MOTOR_FL, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
+        createSparkMax("frontRight", DriveConstants.DRIVE_MOTOR_FR, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
+        createSparkMax("backLeft", DriveConstants.DRIVE_MOTOR_BL, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
+        createSparkMax("backRight", DriveConstants.DRIVE_MOTOR_BR, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
+        Translation2d(DriveConstants.WHEELBASE / 2, DriveConstants.TRACKWIDTH / 2),
+        Translation2d(DriveConstants.WHEELBASE / 2, -DriveConstants.TRACKWIDTH / 2),
+        Translation2d(-DriveConstants.WHEELBASE / 2, DriveConstants.TRACKWIDTH / 2),
+        Translation2d(-DriveConstants.WHEELBASE / 2, -DriveConstants.TRACKWIDTH / 2),
+        ahrs,
+        DriveConstants.MAX_LINEAR_SPEED,
+        DriveConstants.MAX_ROT_SPEED,
+        SimpleMotorFeedforward(DriveConstants.DRIVE_KS, DriveConstants.DRIVE_KV, DriveConstants.DRIVE_KA),
+        PIDController(DriveConstants.DRIVE_KP, DriveConstants.DRIVE_KI, DriveConstants.DRIVE_KD)
       )
     }
   }
