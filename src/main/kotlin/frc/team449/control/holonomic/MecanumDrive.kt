@@ -29,7 +29,7 @@ import io.github.oblarg.oblog.annotations.Log
  * @param backRightLocation the offset of the back right wheel to the center of the robot
  * @param maxLinearSpeed the maximum translation speed of the chassis.
  * @param maxRotSpeed the maximum rotation speed of the chassis
- * @param feedForward the SimpleMotorFeedforward for the robot
+ * @param feedForward the SimpleMotorFeedforward for mecanum
  * @param controller the PIDController for the robot
  */
 class MecanumDrive(
@@ -76,15 +76,14 @@ class MecanumDrive(
     }
 
   private var desiredWheelSpeeds = MecanumDriveWheelSpeeds()
-  private var disabledChassisSpeeds = ChassisSpeeds(0.0, 0.0, 0.0)
   private var prevTime = Double.NaN
   override fun set(desiredSpeeds: ChassisSpeeds) {
     desiredWheelSpeeds = kinematics.toWheelSpeeds(desiredSpeeds)
-    desiredWheelSpeeds.desaturate(this.maxLinearSpeed)
+    desiredWheelSpeeds.desaturate(DriveConstants.MAX_ATTAINABLE_MODULE_SPEED)
   }
 
   override fun stop() {
-    this.set(disabledChassisSpeeds)
+    this.set(ChassisSpeeds(0.0, 0.0, 0.0))
   }
 
   override fun periodic() {
@@ -94,10 +93,10 @@ class MecanumDrive(
     }
     val dtSec = currTime - prevTime
 
-    val frontLeftPID = controller.calculate(frontLeftMotor.velocity)
-    val frontRightPID = controller.calculate(frontRightMotor.velocity)
-    val backLeftPID = controller.calculate(backLeftMotor.velocity)
-    val backRightPID = controller.calculate(backRightMotor.velocity)
+    val frontLeftPID = controller.calculate(frontLeftMotor.velocity, desiredWheelSpeeds.frontLeftMetersPerSecond)
+    val frontRightPID = controller.calculate(frontRightMotor.velocity, desiredWheelSpeeds.frontRightMetersPerSecond)
+    val backLeftPID = controller.calculate(backLeftMotor.velocity, desiredWheelSpeeds.rearLeftMetersPerSecond)
+    val backRightPID = controller.calculate(backRightMotor.velocity, desiredWheelSpeeds.rearRightMetersPerSecond)
 
     val frontLeftFF = feedForward.calculate(
       frontLeftMotor.velocity,
@@ -139,7 +138,7 @@ class MecanumDrive(
   }
 
   companion object {
-    /** Create a new Mecanum Drive using constants from DriveConstants */
+    /** Create a new Mecanum Drive from DriveConstants */
     fun createMecanum(ahrs: AHRS): MecanumDrive {
       return MecanumDrive(
         createSparkMax("frontLeft", DriveConstants.DRIVE_MOTOR_FL, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),

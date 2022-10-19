@@ -90,7 +90,7 @@ open class SwerveDrive(
      *  apply scaling down */
     SwerveDriveKinematics.desaturateWheelSpeeds(
       desiredModuleStates,
-      DriveConstants.MAX_ATTAINABLE_MK4I_SPEED
+      DriveConstants.MAX_ATTAINABLE_MODULE_SPEED
     )
 
     for (i in this.modules.indices) {
