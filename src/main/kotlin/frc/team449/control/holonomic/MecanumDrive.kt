@@ -32,7 +32,7 @@ import io.github.oblarg.oblog.annotations.Log
  * @param feedForward the SimpleMotorFeedforward for mecanum
  * @param controller the PIDController for the robot
  */
-class MecanumDrive(
+open class MecanumDrive(
   private val frontLeftMotor: WrappedMotor,
   private val frontRightMotor: WrappedMotor,
   private val backLeftMotor: WrappedMotor,
@@ -41,7 +41,7 @@ class MecanumDrive(
   frontRightLocation: Translation2d,
   backLeftLocation: Translation2d,
   backRightLocation: Translation2d,
-  private val ahrs: AHRS,
+  val ahrs: AHRS,
   override val maxLinearSpeed: Double,
   override val maxRotSpeed: Double,
   private val feedForward: SimpleMotorFeedforward,
@@ -55,7 +55,7 @@ class MecanumDrive(
 
   // 10.500 x, 10.713 y (outreach 2022) (in.) (top right) (y is horizontal axis)
 
-  private val kinematics = MecanumDriveKinematics(
+  val kinematics = MecanumDriveKinematics(
     frontLeftLocation, frontRightLocation, backLeftLocation, backRightLocation
   )
 
