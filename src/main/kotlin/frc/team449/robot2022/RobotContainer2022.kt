@@ -3,8 +3,8 @@ package frc.team449.robot2022
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.SerialPort
 import edu.wpi.first.wpilibj.XboxController
-import edu.wpi.first.wpilibj.motorcontrol.MotorController
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
+import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import frc.team449.RobotContainerBase
 import frc.team449.control.auto.AutoRoutine
@@ -13,8 +13,7 @@ import frc.team449.robot2022.drive.DriveConstants
 import frc.team449.robot2022.intake.Intake
 import frc.team449.system.AHRS
 import frc.team449.system.encoder.AbsoluteEncoder
-import frc.team449.system.encoder.Encoder
-import frc.team449.system.motor.WrappedMotor
+import frc.team449.system.encoder.NEOEncoder
 import frc.team449.system.motor.createSparkMax
 import io.github.oblarg.oblog.annotations.Log
 
@@ -40,12 +39,9 @@ class RobotContainer2022() : RobotContainerBase() {
   override val autoChooser = addRoutines()
 
   val name: String = "intakeMotor"
-  val motorController: MotorController = TODO()
-  val encoder: Encoder = TODO()
 
-  val intakeMotor = WrappedMotor("intakeMotor", motorController, encoder)
-
-
+  val intakeMotor = createSparkMax("intakeMotor", 13, NEOEncoder.creator(1.0, 1.0))
+  val intakeObj = Intake(intakeMotor)
 
   /** Helper to make turning motors for swerve */
 
@@ -80,10 +76,18 @@ class RobotContainer2022() : RobotContainerBase() {
   }
 
   override fun teleopInit() {
-    // todo Add button bindings here
-    JoystickButton(
-      driveController,
-      XboxController.Button.kStart.value
+    // Y Button - Intake Forward
+    JoystickButton(driveController, XboxController.Button.kY.value).whileHeld(
+      InstantCommand(intakeObj::runIntakeForward)
+    )
+    // A Button - Intake Reverse
+    JoystickButton(driveController, XboxController.Button.kA.value).whenPressed(
+      InstantCommand(intakeObj::runIntakeReverse)
+    )
+
+    // X Button - Stop Intake
+    JoystickButton(driveController, XboxController.Button.kX.value).whenPressed(
+      InstantCommand(intakeObj::stopIntake)
     )
   }
 

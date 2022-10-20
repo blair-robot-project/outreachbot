@@ -9,16 +9,16 @@ class Intake(
 
   // Run intake motor forwards
   fun runIntakeForward() {
-    intakeMotor.setVoltage(IntakeConstants.intakeVoltage)
+    intakeMotor.set(IntakeConstants.intakeVoltage)
   }
 
   // Run intake motor reverse
   fun runIntakeReverse() {
-    intakeMotor.setVoltage(-IntakeConstants.intakeVoltage)
+    intakeMotor.set(-IntakeConstants.intakeVoltage)
   }
 
   // Stop intake motor
   fun stopIntake() {
-    intakeMotor.setVoltage(0.0)
+    intakeMotor.set(0.0)
   }
 }
