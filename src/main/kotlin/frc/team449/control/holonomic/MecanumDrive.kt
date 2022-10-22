@@ -156,5 +156,9 @@ open class MecanumDrive(
         PIDController(DriveConstants.DRIVE_KP, DriveConstants.DRIVE_KI, DriveConstants.DRIVE_KD)
       )
     }
+    fun simOf(drive: MecanumDrive): MecanumSim {
+      return MecanumSim()
+      // TODO put in all the parameters and the errors will go away
+    }
   }
 }
