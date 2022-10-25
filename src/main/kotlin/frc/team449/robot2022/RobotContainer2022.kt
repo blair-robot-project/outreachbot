@@ -11,6 +11,7 @@ import frc.team449.control.auto.AutoRoutine
 import frc.team449.robot2022.auto.Example
 import frc.team449.robot2022.drive.DriveConstants
 import frc.team449.robot2022.intake.Intake
+import frc.team449.robot2022.shooter.Shooter
 import frc.team449.system.AHRS
 import frc.team449.system.encoder.AbsoluteEncoder
 import frc.team449.system.encoder.NEOEncoder
@@ -38,10 +39,17 @@ class RobotContainer2022() : RobotContainerBase() {
 
   override val autoChooser = addRoutines()
 
-  val name: String = "intakeMotor"
+  // INTAKE VALUES
+  val intakeName: String = "intakeMotor"
 
-  val intakeMotor = createSparkMax("intakeMotor", 13, NEOEncoder.creator(1.0, 1.0))
+  val intakeMotor = createSparkMax("intakeMotor", 13, NEOEncoder.creator(1.0, 1.0)) // TODO - Find actual ID
   val intakeObj = Intake(intakeMotor)
+
+  // SHOOTER VALUES
+  val shooterName: String = "shooterMotor"
+
+  val shooterMotor = createSparkMax("shooterMotor", 13, NEOEncoder.creator(1.0, 1.0)) // TODO - Find actual ID
+  val shooterObj = Shooter(shooterMotor)
 
   /** Helper to make turning motors for swerve */
 
@@ -76,6 +84,7 @@ class RobotContainer2022() : RobotContainerBase() {
   }
 
   override fun teleopInit() {
+    // --------- INTAKE CONTROLS ---------
     // Y Button - Intake Forward
     JoystickButton(driveController, XboxController.Button.kY.value).whileHeld(
       InstantCommand(intakeObj::runIntakeForward)
@@ -84,10 +93,20 @@ class RobotContainer2022() : RobotContainerBase() {
     JoystickButton(driveController, XboxController.Button.kA.value).whenPressed(
       InstantCommand(intakeObj::runIntakeReverse)
     )
-
     // X Button - Stop Intake
     JoystickButton(driveController, XboxController.Button.kX.value).whenPressed(
       InstantCommand(intakeObj::stopIntake)
+    )
+
+    // --------- SHOOTER CONTROLS ---------
+    // Right Bumper - Hold to run shooter, Release to stop shooter
+    JoystickButton(
+      driveController,
+      XboxController.Button.kRightBumper.value
+    ).whenPressed(
+      InstantCommand(shooterObj::runShooter)
+    ).whenReleased(
+      InstantCommand(shooterObj::stopShooter)
     )
   }
 
