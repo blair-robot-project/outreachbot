@@ -8,18 +8,32 @@ import frc.team449.system.motor.WrappedMotor
 class Shooter(
   private val feedForward: SimpleMotorFeedforward,
   private val controller: PIDController,
-
-  val shooterMotor: WrappedMotor
+  private val shooterMotor: WrappedMotor
 
 ) : SubsystemBase() {
 
-  // Run shooter motor forward
+  var runShoot = false
+
+  // Change runShoot to true.
   fun runShooter() {
-    shooterMotor.setVoltage(controller.calculate(shooterMotor.velocity, ShooterConstants.desiredShooterVoltage) + feedForward.calculate(shooterMotor.velocity, ShooterConstants.desiredShooterVoltage, ShooterConstants.deltaTime))
+    runShoot = true
   }
 
-  // Stop shooter motor
+  // Change runShoot to false.
   fun stopShooter() {
-    shooterMotor.set(0.0)
+    runShoot = false
+  }
+
+  // Uses PID and FF to calculate motor voltage.
+  override fun periodic() {
+    if (runShoot) {
+      val pid = controller.calculate(shooterMotor.velocity, ShooterConstants.shooterVel)
+      val ff = feedForward.calculate(ShooterConstants.shooterVel)
+
+      shooterMotor.setVoltage(pid + ff)
+    }
+    else {
+      shooterMotor.set(0.0)
+    }
   }
 }

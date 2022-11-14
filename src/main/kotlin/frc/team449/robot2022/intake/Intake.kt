@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.system.motor.WrappedMotor
 
 class Intake(
-  val intakeMotor: WrappedMotor
+  private val intakeMotor: WrappedMotor
 ) : SubsystemBase() {
 
   // Run intake motor forwards
