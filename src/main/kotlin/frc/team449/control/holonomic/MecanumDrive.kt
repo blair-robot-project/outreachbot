@@ -76,7 +76,7 @@ open class MecanumDrive(
     }
 
   private var desiredWheelSpeeds = MecanumDriveWheelSpeeds()
-  private var prevTime = Double.NaN
+
   override fun set(desiredSpeeds: ChassisSpeeds) {
     desiredWheelSpeeds = kinematics.toWheelSpeeds(desiredSpeeds)
     desiredWheelSpeeds.desaturate(DriveConstants.MAX_ATTAINABLE_MODULE_SPEED)
@@ -87,11 +87,6 @@ open class MecanumDrive(
   }
 
   override fun periodic() {
-    val currTime = Timer.getFPGATimestamp()
-    if (prevTime.isNaN()) {
-      prevTime = currTime - 0.02
-    }
-    val dtSec = currTime - prevTime
 
     val frontLeftPID = controller.calculate(frontLeftMotor.velocity, desiredWheelSpeeds.frontLeftMetersPerSecond)
     val frontRightPID = controller.calculate(frontRightMotor.velocity, desiredWheelSpeeds.frontRightMetersPerSecond)
@@ -99,24 +94,16 @@ open class MecanumDrive(
     val backRightPID = controller.calculate(backRightMotor.velocity, desiredWheelSpeeds.rearRightMetersPerSecond)
 
     val frontLeftFF = feedForward.calculate(
-      frontLeftMotor.velocity,
-      desiredWheelSpeeds.frontLeftMetersPerSecond,
-      dtSec
+      frontLeftMotor.velocity
     )
     val frontRightFF = feedForward.calculate(
-      frontRightMotor.velocity,
-      desiredWheelSpeeds.frontRightMetersPerSecond,
-      dtSec
+      frontRightMotor.velocity
     )
     val backLeftFF = feedForward.calculate(
-      backLeftMotor.velocity,
-      desiredWheelSpeeds.rearLeftMetersPerSecond,
-      dtSec
+      backLeftMotor.velocity
     )
     val backRightFF = feedForward.calculate(
-      backRightMotor.velocity,
-      desiredWheelSpeeds.rearRightMetersPerSecond,
-      dtSec
+      backRightMotor.velocity
     )
 
     frontLeftMotor.setVoltage(frontLeftPID + frontLeftFF)
@@ -133,8 +120,6 @@ open class MecanumDrive(
         backRightMotor.velocity
       )
     )
-
-    prevTime = currTime
   }
 
   companion object {
@@ -155,10 +140,6 @@ open class MecanumDrive(
         SimpleMotorFeedforward(DriveConstants.DRIVE_KS, DriveConstants.DRIVE_KV, DriveConstants.DRIVE_KA),
         PIDController(DriveConstants.DRIVE_KP, DriveConstants.DRIVE_KI, DriveConstants.DRIVE_KD)
       )
-    }
-    fun simOf(drive: MecanumDrive): MecanumSim {
-      return MecanumSim()
-      // TODO put in all the parameters and the errors will go away
     }
   }
 }
