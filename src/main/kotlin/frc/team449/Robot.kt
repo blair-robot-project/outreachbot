@@ -7,13 +7,14 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
+import frc.team449.control.DriveCommand
 import frc.team449.robot2022.RobotContainer2022
 import io.github.oblarg.oblog.Logger
 
 /** The main class of the robot, constructs all the subsystems and initializes default commands. */
 class Robot : TimedRobot() {
 
-  private val robotContainer: RobotContainerBase = RobotContainer2022()
+  private val robotContainer: RobotContainer2022 = RobotContainer2022()
   private var autoCommand: Command? = null
 
   override fun robotInit() {
@@ -63,6 +64,7 @@ class Robot : TimedRobot() {
   }
 
   override fun teleopPeriodic() {
+    robotContainer.drive.defaultCommand = DriveCommand(robotContainer.oi, robotContainer.drive)
     robotContainer.teleopPeriodic()
   }
 

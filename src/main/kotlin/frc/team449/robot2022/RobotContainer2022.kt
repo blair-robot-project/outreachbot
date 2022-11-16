@@ -1,22 +1,18 @@
 package frc.team449.robot2022
 
 import edu.wpi.first.wpilibj.PowerDistribution
-import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.SerialPort
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import frc.team449.RobotContainerBase
 import frc.team449.control.auto.AutoRoutine
-import frc.team449.control.holonomic.HolonomicDrive
-import frc.team449.control.holonomic.MecanumDrive
 import frc.team449.control.holonomic.MecanumDrive.Companion.createMecanum
-import frc.team449.control.holonomic.MecanumDrive.Companion.simOf
 import frc.team449.control.holonomic.OIHolonomic.Companion.createHolonomicOI
 import frc.team449.robot2022.auto.Example
 import frc.team449.system.AHRS
 import io.github.oblarg.oblog.annotations.Log
 
-class RobotContainer2022() : RobotContainerBase() {
+class RobotContainer2022 : RobotContainerBase() {
 
   // Other CAN IDs
   private val PDP_CAN = 1
@@ -31,9 +27,9 @@ class RobotContainer2022() : RobotContainerBase() {
   override val powerDistribution: PowerDistribution = PowerDistribution(PDP_CAN, PowerDistribution.ModuleType.kCTRE)
 
   @Log.Include
-  override val drive = if (isReal()) createMecanum(this.ahrs) else simOf(createMecanum(this.ahrs))
+  val drive = createMecanum(ahrs)
 
-  override val oi = createHolonomicOI(this, driveController)
+  val oi = createHolonomicOI(drive, driveController)
 
   override val autoChooser = addRoutines()
 

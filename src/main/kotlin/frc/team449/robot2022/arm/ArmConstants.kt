@@ -12,5 +12,4 @@ object ArmConstants {
   const val ARM_GEARING = 1 / 1.0
   const val ARM_UPR = 2 * 3.141592
   const val ARM_ID = 1
-
 }

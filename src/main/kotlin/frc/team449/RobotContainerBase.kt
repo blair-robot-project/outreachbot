@@ -14,8 +14,6 @@ abstract class RobotContainerBase {
 
   abstract val powerDistribution: PowerDistribution
 
-//  abstract val driveSim: DriveSubsystem.SimController? // TODO SIM
-
   private val simBattery: SimBattery = SimBattery()
 
   open fun robotInit() {

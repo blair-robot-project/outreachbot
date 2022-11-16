@@ -31,8 +31,7 @@ class Shooter(
       val ff = feedForward.calculate(ShooterConstants.shooterVel)
 
       shooterMotor.setVoltage(pid + ff)
-    }
-    else {
+    } else {
       shooterMotor.set(0.0)
     }
   }

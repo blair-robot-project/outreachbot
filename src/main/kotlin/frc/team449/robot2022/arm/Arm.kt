@@ -10,18 +10,18 @@ import frc.team449.system.motor.createSparkMax
 class Arm(
   val armMotor: WrappedMotor,
   val pid: ProfiledPIDController
-): SubsystemBase() {
+) : SubsystemBase() {
   var desiredAngle = 0.0
-    fun get() = desiredAngle
-    fun set(a:Double) {desiredAngle = a}
+  fun get() = desiredAngle
+  fun set(a: Double) { desiredAngle = a }
 
   override fun periodic() {
     val armPID = pid.calculate(armMotor.position, desiredAngle)
     armMotor.set(armPID)
   }
 
-  companion object{
-    fun createArm():Arm{
+  companion object {
+    fun createArm(): Arm {
       return Arm(
         createSparkMax("armMotor", ArmConstants.ARM_ID, NEOEncoder.creator(ArmConstants.ARM_UPR, ArmConstants.ARM_GEARING)),
         ProfiledPIDController(ArmConstants.ARM_KP, ArmConstants.ARM_KI, ArmConstants.ARM_KD, TrapezoidProfile.Constraints(ArmConstants.MAX_SPD, ArmConstants.MAX_ACC))
