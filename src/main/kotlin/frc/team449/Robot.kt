@@ -13,7 +13,7 @@ import io.github.oblarg.oblog.Logger
 /** The main class of the robot, constructs all the subsystems and initializes default commands. */
 class Robot : TimedRobot() {
 
-  private val robotContainer = RobotContainer2022()
+  private val robotContainer: RobotContainerBase = RobotContainer2022()
   private var autoCommand: Command? = null
 
   override fun robotInit() {
@@ -25,28 +25,32 @@ class Robot : TimedRobot() {
       DriverStation.silenceJoystickConnectionWarning(true)
     }
 
+    robotContainer.robotInit()
+
     Logger.configureLoggingAndConfig(robotContainer, false)
     Shuffleboard.setRecordingFileNameFormat("log-\${time}")
     Shuffleboard.startRecording()
 
     SmartDashboard.putData(robotContainer.field)
+
+    SmartDashboard.putData(robotContainer.autoChooser)
   }
 
   override fun robotPeriodic() {
     CommandScheduler.getInstance().run()
 
-    robotContainer.robotPeriodic()
+    Logger.updateEntries()
 
-    robotContainer.field.setRobotPose(robotContainer.drive.pose)
+    robotContainer.robotPeriodic()
   }
 
   override fun autonomousInit() {
-    var routine = robotContainer.autoChooser.getSelected()
+    val routine = robotContainer.autoChooser.selected
     if (routine != null) {
       this.autoCommand = routine.cmd
-      robotContainer.field.getObject(routine.name).setTrajectory(routine.traj)
       CommandScheduler.getInstance().schedule(this.autoCommand)
     }
+    robotContainer.autonomousInit()
   }
 
   override fun autonomousPeriodic() {}
@@ -59,10 +63,12 @@ class Robot : TimedRobot() {
   }
 
   override fun teleopPeriodic() {
-    robotContainer.drive.set(robotContainer.oi.get())
+    robotContainer.teleopPeriodic()
   }
 
-  override fun disabledInit() {}
+  override fun disabledInit() {
+    robotContainer.disabledInit()
+  }
 
   override fun disabledPeriodic() {}
 
