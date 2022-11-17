@@ -1,13 +1,15 @@
 package frc.team449.control.holonomic
 
+import edu.wpi.first.math.MatBuilder
+import edu.wpi.first.math.Nat
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics
-import edu.wpi.first.math.kinematics.MecanumDriveOdometry
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.robot2022.drive.DriveConstants
@@ -58,7 +60,16 @@ open class MecanumDrive(
     frontLeftLocation, frontRightLocation, backLeftLocation, backRightLocation
   )
 
-  private val odometry = MecanumDriveOdometry(kinematics, -ahrs.heading)
+  // private val camera = PhotonCamera(DriveConstants.CAMNAME)
+
+  private val poseEstimator = MecanumDrivePoseEstimator(
+    -ahrs.heading,
+    Pose2d(0.0, 0.0, Rotation2d(0.0)),
+    kinematics,
+    MatBuilder(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01, 0.02, 0.02),
+    MatBuilder(Nat.N1(), Nat.N1()).fill(0.02, 0.02, 0.01),
+    MatBuilder(Nat.N3(), Nat.N1()).fill(0.1, 0.1, 0.01)
+  )
 
   override val heading: Rotation2d
     get() {
@@ -68,10 +79,10 @@ open class MecanumDrive(
   override var pose: Pose2d
     @Log.ToString
     get() {
-      return this.odometry.poseMeters
+      return this.poseEstimator.estimatedPosition
     }
     set(value) {
-      this.odometry.resetPosition(value, heading)
+      this.poseEstimator.resetPosition(value, heading)
     }
 
   private var desiredWheelSpeeds = MecanumDriveWheelSpeeds()
@@ -110,7 +121,7 @@ open class MecanumDrive(
     backLeftMotor.setVoltage(backLeftPID + backLeftFF)
     backRightMotor.setVoltage(backRightPID + backRightFF)
 
-    this.odometry.update(
+    this.poseEstimator.update(
       heading,
       MecanumDriveWheelSpeeds(
         frontLeftMotor.velocity,
@@ -139,6 +150,10 @@ open class MecanumDrive(
         SimpleMotorFeedforward(DriveConstants.DRIVE_KS, DriveConstants.DRIVE_KV, DriveConstants.DRIVE_KA),
         PIDController(DriveConstants.DRIVE_KP, DriveConstants.DRIVE_KI, DriveConstants.DRIVE_KD)
       )
+    }
+
+    fun simDrive(ahrs: AHRS): MecanumDrive {
+      return MecanumSim(ahrs)
     }
   }
 }
