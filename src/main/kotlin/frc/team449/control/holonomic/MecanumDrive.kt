@@ -5,15 +5,15 @@ import edu.wpi.first.math.Nat
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.geometry.*
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds
+import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.robot2022.drive.DriveConstants
 import frc.team449.system.AHRS
+import frc.team449.system.VisionCamera
 import frc.team449.system.encoder.NEOEncoder
 import frc.team449.system.motor.WrappedMotor
 import frc.team449.system.motor.createSparkMax
@@ -46,13 +46,17 @@ open class MecanumDrive(
   override val maxLinearSpeed: Double,
   override val maxRotSpeed: Double,
   private val feedForward: SimpleMotorFeedforward,
-  private val controller: PIDController
+  private val controller: () -> PIDController,
+  private val cameras: MutableList<VisionCamera> = mutableListOf()
 ) : HolonomicDrive, SubsystemBase() {
   init {
-    controller.reset()
     ahrs.calibrate()
     ahrs.reset()
   }
+  private val flController = controller()
+  private val frController = controller()
+  private val blController = controller()
+  private val brController = controller()
 
   // 10.500 x, 10.713 y (outreach 2022) (in.) (top right) (y is horizontal axis)
 
@@ -60,15 +64,13 @@ open class MecanumDrive(
     frontLeftLocation, frontRightLocation, backLeftLocation, backRightLocation
   )
 
-  // private val camera = PhotonCamera(DriveConstants.CAMNAME)
-
   private val poseEstimator = MecanumDrivePoseEstimator(
     -ahrs.heading,
-    Pose2d(0.0, 0.0, Rotation2d(0.0)),
+    Pose2d(),
     kinematics,
-    MatBuilder(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01, 0.02, 0.02),
-    MatBuilder(Nat.N1(), Nat.N1()).fill(0.02, 0.02, 0.01),
-    MatBuilder(Nat.N3(), Nat.N1()).fill(0.1, 0.1, 0.01)
+    MatBuilder(Nat.N3(), Nat.N1()).fill(0.01, 0.01, 0.01),
+    MatBuilder(Nat.N1(), Nat.N1()).fill(0.01),
+    MatBuilder(Nat.N3(), Nat.N1()).fill(.05, .05, .05)
   )
 
   override val heading: Rotation2d
@@ -98,10 +100,10 @@ open class MecanumDrive(
 
   override fun periodic() {
 
-    val frontLeftPID = controller.calculate(frontLeftMotor.velocity, desiredWheelSpeeds.frontLeftMetersPerSecond)
-    val frontRightPID = controller.calculate(frontRightMotor.velocity, desiredWheelSpeeds.frontRightMetersPerSecond)
-    val backLeftPID = controller.calculate(backLeftMotor.velocity, desiredWheelSpeeds.rearLeftMetersPerSecond)
-    val backRightPID = controller.calculate(backRightMotor.velocity, desiredWheelSpeeds.rearRightMetersPerSecond)
+    val frontLeftPID = flController.calculate(frontLeftMotor.velocity, desiredWheelSpeeds.frontLeftMetersPerSecond)
+    val frontRightPID = frController.calculate(frontRightMotor.velocity, desiredWheelSpeeds.frontRightMetersPerSecond)
+    val backLeftPID = blController.calculate(backLeftMotor.velocity, desiredWheelSpeeds.rearLeftMetersPerSecond)
+    val backRightPID = brController.calculate(backRightMotor.velocity, desiredWheelSpeeds.rearRightMetersPerSecond)
 
     val frontLeftFF = feedForward.calculate(
       frontLeftMotor.velocity
@@ -121,6 +123,8 @@ open class MecanumDrive(
     backLeftMotor.setVoltage(backLeftPID + backLeftFF)
     backRightMotor.setVoltage(backRightPID + backRightFF)
 
+    if (cameras.isNotEmpty()) localize()
+
     this.poseEstimator.update(
       heading,
       MecanumDriveWheelSpeeds(
@@ -130,6 +134,20 @@ open class MecanumDrive(
         backRightMotor.velocity
       )
     )
+  }
+  fun addCamera(camera: VisionCamera) {
+    cameras.add(camera)
+  }
+
+  private fun localize() {
+    for (camera in cameras) {
+      if (camera.hasTarget()) {
+        poseEstimator.addVisionMeasurement(
+          camera.camPose(Pose3d(Transform3d())),
+          Timer.getFPGATimestamp() - camera.latency()
+        )
+      }
+    }
   }
 
   companion object {
@@ -148,7 +166,7 @@ open class MecanumDrive(
         DriveConstants.MAX_LINEAR_SPEED,
         DriveConstants.MAX_ROT_SPEED,
         SimpleMotorFeedforward(DriveConstants.DRIVE_KS, DriveConstants.DRIVE_KV, DriveConstants.DRIVE_KA),
-        PIDController(DriveConstants.DRIVE_KP, DriveConstants.DRIVE_KI, DriveConstants.DRIVE_KD)
+        { PIDController(DriveConstants.DRIVE_KP, DriveConstants.DRIVE_KI, DriveConstants.DRIVE_KD) }
       )
     }
 

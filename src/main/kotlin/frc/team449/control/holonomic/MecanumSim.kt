@@ -27,7 +27,7 @@ class MecanumSim(
   DriveConstants.MAX_LINEAR_SPEED,
   DriveConstants.MAX_ROT_SPEED,
   SimpleMotorFeedforward(DriveConstants.DRIVE_KS, DriveConstants.DRIVE_KV, DriveConstants.DRIVE_KA),
-  PIDController(DriveConstants.DRIVE_KP, DriveConstants.DRIVE_KI, DriveConstants.DRIVE_KD)
+  { PIDController(DriveConstants.DRIVE_KP, DriveConstants.DRIVE_KI, DriveConstants.DRIVE_KD) }
 ) {
   private var lastTime = Timer.getFPGATimestamp()
 

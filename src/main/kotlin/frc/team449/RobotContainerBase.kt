@@ -17,9 +17,6 @@ abstract class RobotContainerBase {
   private val simBattery: SimBattery = SimBattery()
 
   open fun robotInit() {
-//    if (driveSim != null) {
-//      simBattery.addCurrentDrawer(driveSim!!::getCurrentDraw)
-//    }
   }
 
   open fun robotPeriodic() {}

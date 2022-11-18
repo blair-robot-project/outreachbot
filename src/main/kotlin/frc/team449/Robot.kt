@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.team449.control.DriveCommand
 import frc.team449.robot2022.RobotContainer2022
+import frc.team449.system.VisionCamera
 import io.github.oblarg.oblog.Logger
 
 /** The main class of the robot, constructs all the subsystems and initializes default commands. */
@@ -35,10 +36,14 @@ class Robot : TimedRobot() {
     SmartDashboard.putData(robotContainer.field)
 
     SmartDashboard.putData(robotContainer.autoChooser)
+
+    robotContainer.drive.addCamera(VisionCamera("gloworm"))
   }
 
   override fun robotPeriodic() {
     CommandScheduler.getInstance().run()
+
+    robotContainer.field.robotPose = robotContainer.drive.pose
 
     Logger.updateEntries()
 

@@ -1,5 +1,6 @@
 package frc.team449.robot2022
 
+import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.SerialPort
@@ -7,6 +8,7 @@ import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import frc.team449.RobotContainerBase
 import frc.team449.control.auto.AutoRoutine
+import frc.team449.control.holonomic.MecanumDrive
 import frc.team449.control.holonomic.MecanumDrive.Companion.createMecanum
 import frc.team449.control.holonomic.MecanumDrive.Companion.simDrive
 import frc.team449.control.holonomic.OIHolonomic.Companion.createHolonomicOI
@@ -15,7 +17,10 @@ import frc.team449.system.AHRS
 import io.github.oblarg.oblog.annotations.Log
 
 class RobotContainer2022 : RobotContainerBase() {
-
+  init {
+    NetworkTableInstance.getDefault().stopServer()
+    NetworkTableInstance.getDefault().startClient("localhost")
+  }
   // Other CAN IDs
   private val PDP_CAN = 1
   private val PCM_MODULE = 0
@@ -29,7 +34,7 @@ class RobotContainer2022 : RobotContainerBase() {
   override val powerDistribution: PowerDistribution = PowerDistribution(PDP_CAN, PowerDistribution.ModuleType.kCTRE)
 
   @Log.Include
-  val drive = if (isReal()) createMecanum(ahrs) else simDrive(ahrs)
+  val drive: MecanumDrive = if (isReal()) createMecanum(ahrs) else simDrive(ahrs)
 
   val oi = createHolonomicOI(drive, driveController)
 
