@@ -16,4 +16,10 @@ object Paths {
       AutoConstants.MAX_VEL,
       AutoConstants.MAX_ACC
     )
+  val NEWFIELD =
+    PathPlanner.loadPath(
+      "newfield",
+      AutoConstants.MAX_VEL,
+      AutoConstants.MAX_ACC
+    )
 }

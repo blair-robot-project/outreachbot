@@ -33,6 +33,8 @@ object DriveConstants {
   const val TRANSLATION_DEADBAND = .08
   const val ROTATION_DEADBAND = .07
 
+  val CAMNAME = "PhotonCam"
+
   val WHEELBASE = Units.inchesToMeters(21.000)
   val TRACKWIDTH = Units.inchesToMeters(21.426)
 }
