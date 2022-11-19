@@ -1,5 +1,7 @@
 package frc.team449.robot2022
 
+import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.RobotBase.isReal
@@ -13,7 +15,11 @@ import frc.team449.control.holonomic.MecanumDrive.Companion.createMecanum
 import frc.team449.control.holonomic.MecanumDrive.Companion.simDrive
 import frc.team449.control.holonomic.OIHolonomic.Companion.createHolonomicOI
 import frc.team449.robot2022.auto.Example
+import frc.team449.robot2022.shooter.Shooter
+import frc.team449.robot2022.shooter.ShooterConstants
 import frc.team449.system.AHRS
+import frc.team449.system.encoder.NEOEncoder
+import frc.team449.system.motor.createSparkMax
 import io.github.oblarg.oblog.annotations.Log
 
 class RobotContainer2022 : RobotContainerBase() {
@@ -34,13 +40,15 @@ class RobotContainer2022 : RobotContainerBase() {
   override val powerDistribution: PowerDistribution = PowerDistribution(PDP_CAN, PowerDistribution.ModuleType.kCTRE)
 
   @Log.Include
-  val drive: MecanumDrive = if (isReal()) createMecanum(ahrs) else simDrive(ahrs)
+  val drive = simDrive(ahrs)
 
   val oi = createHolonomicOI(drive, driveController)
 
-  // val shooterMotor  = createSparkMax("Shooter Motor", ShooterConstants.SHOOTER_ID, NEOEncoder.creator(1.0, 1.0, 1.0))
+  val shooterMotor  = createSparkMax("Shooter Motor", ShooterConstants.SHOOTER_ID, NEOEncoder.creator(1.0, 1.0))
+  val feederMotor  = createSparkMax("Feeder Motor", ShooterConstants.FEEDER_ID, NEOEncoder.creator(1.0, 1.0))
 
-  // val shooter = Shooter(SimpleMotorFeedforward(0.1, 0.1, 0.1), PIDController(0.1, 0.0, 0.0), )
+
+  val shooter = Shooter(SimpleMotorFeedforward(0.1, 0.1, 0.1), PIDController(0.1, 0.0, 0.0), shooterMotor, feederMotor)
 
   override val autoChooser = addRoutines()
 
