@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.*
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds
-import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.robot2022.drive.DriveConstants
 import frc.team449.system.AHRS
@@ -70,7 +69,7 @@ open class MecanumDrive(
     kinematics,
     MatBuilder(Nat.N3(), Nat.N1()).fill(0.01, 0.01, 0.01),
     MatBuilder(Nat.N1(), Nat.N1()).fill(0.01),
-    MatBuilder(Nat.N3(), Nat.N1()).fill(.05, .05, .05)
+    MatBuilder(Nat.N3(), Nat.N1()).fill(.005, .005, .0005)
   )
 
   override val heading: Rotation2d
@@ -135,6 +134,7 @@ open class MecanumDrive(
       )
     )
   }
+
   fun addCamera(camera: VisionCamera) {
     cameras.add(camera)
   }
@@ -144,7 +144,7 @@ open class MecanumDrive(
       if (camera.hasTarget()) {
         poseEstimator.addVisionMeasurement(
           camera.camPose(Pose3d(Transform3d())),
-          Timer.getFPGATimestamp() - camera.latency()
+          camera.timestamp()
         )
       }
     }

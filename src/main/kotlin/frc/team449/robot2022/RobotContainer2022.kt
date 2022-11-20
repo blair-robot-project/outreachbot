@@ -1,6 +1,5 @@
 package frc.team449.robot2022
 
-import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.SerialPort
@@ -17,10 +16,7 @@ import frc.team449.system.AHRS
 import io.github.oblarg.oblog.annotations.Log
 
 class RobotContainer2022 : RobotContainerBase() {
-  init {
-    NetworkTableInstance.getDefault().stopServer()
-    NetworkTableInstance.getDefault().startClient("localhost")
-  }
+
   // Other CAN IDs
   private val PDP_CAN = 1
   private val PCM_MODULE = 0
@@ -38,9 +34,11 @@ class RobotContainer2022 : RobotContainerBase() {
 
   val oi = createHolonomicOI(drive, driveController)
 
-  // val shooterMotor  = createSparkMax("Shooter Motor", ShooterConstants.SHOOTER_ID, NEOEncoder.creator(1.0, 1.0, 1.0))
+  // create shooter here
 
-  // val shooter = Shooter(SimpleMotorFeedforward(0.1, 0.1, 0.1), PIDController(0.1, 0.0, 0.0), )
+  // create intake here
+
+  // create indexer here
 
   override val autoChooser = addRoutines()
 

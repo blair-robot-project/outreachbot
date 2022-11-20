@@ -7,7 +7,7 @@ class Indexer(
   private val desiredVoltage: Double
 ) {
 
-  fun start() {
+  fun forward() {
     indexMotor.setVoltage(desiredVoltage)
   }
 

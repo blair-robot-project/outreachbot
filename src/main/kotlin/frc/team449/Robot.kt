@@ -1,5 +1,6 @@
 package frc.team449
 
+import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.TimedRobot
@@ -36,6 +37,11 @@ class Robot : TimedRobot() {
     SmartDashboard.putData(robotContainer.field)
 
     SmartDashboard.putData(robotContainer.autoChooser)
+
+    if (!isReal()) {
+      NetworkTableInstance.getDefault().stopServer()
+      NetworkTableInstance.getDefault().startClient("localhost")
+    }
 
     robotContainer.drive.addCamera(VisionCamera("gloworm"))
   }

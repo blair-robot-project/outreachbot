@@ -18,17 +18,23 @@ class VisionCamera(
   fun camPose(targetPose: Pose3d): Pose2d {
     val result = latestResult
     val camToTarget: Transform3d = result.bestTarget.bestCameraToTarget
-    val camToField: Pose3d = targetPose.transformBy(camToTarget.inverse())
-    val camPose = camToField.toPose2d()
-    println("The pose of the robot is (${camPose.x}, ${camPose.y}, ${camPose.rotation.degrees} deg)")
+    val fieldToCam: Pose3d = targetPose.transformBy(camToTarget.inverse())
+    val camPose = fieldToCam.toPose2d()
+    println("The pose of the camera is (${camPose.x}, ${camPose.y}, ${camPose.rotation.degrees} deg)")
     return camPose
   }
 
+  /**
+   * @return if the camera has a target or not
+   */
   fun hasTarget(): Boolean {
     return latestResult.hasTargets()
   }
 
-  fun latency(): Double {
-    return latestResult.latencyMillis
+  /**
+   * @return the FPGA timestamp (seconds since the robot started running)
+   */
+  fun timestamp(): Double {
+    return latestResult.timestampSeconds
   }
 }
