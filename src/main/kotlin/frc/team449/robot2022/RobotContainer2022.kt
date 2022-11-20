@@ -1,14 +1,11 @@
 package frc.team449.robot2022
 
 import edu.wpi.first.wpilibj.PowerDistribution
-import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.SerialPort
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import frc.team449.RobotContainerBase
 import frc.team449.control.auto.AutoRoutine
-import frc.team449.control.holonomic.MecanumDrive
-import frc.team449.control.holonomic.MecanumDrive.Companion.createMecanum
 import frc.team449.control.holonomic.MecanumDrive.Companion.simDrive
 import frc.team449.control.holonomic.OIHolonomic.Companion.createHolonomicOI
 import frc.team449.robot2022.auto.Example
@@ -30,7 +27,7 @@ class RobotContainer2022 : RobotContainerBase() {
   override val powerDistribution: PowerDistribution = PowerDistribution(PDP_CAN, PowerDistribution.ModuleType.kCTRE)
 
   @Log.Include
-  val drive: MecanumDrive = if (isReal()) createMecanum(ahrs) else simDrive(ahrs)
+  val drive = simDrive(ahrs)
 
   val oi = createHolonomicOI(drive, driveController)
 
