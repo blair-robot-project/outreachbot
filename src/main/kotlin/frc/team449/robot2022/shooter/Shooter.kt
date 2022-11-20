@@ -8,7 +8,8 @@ import frc.team449.system.motor.WrappedMotor
 class Shooter(
   private val feedForward: SimpleMotorFeedforward,
   private val controller: PIDController,
-  private val shooterMotor: WrappedMotor
+  private val shooterMotor: WrappedMotor,
+  private val feederMotor: WrappedMotor
 
 ) : SubsystemBase() {
 
@@ -30,7 +31,8 @@ class Shooter(
       val pid = controller.calculate(shooterMotor.velocity, ShooterConstants.shooterVel)
       val ff = feedForward.calculate(ShooterConstants.shooterVel)
 
-      shooterMotor.setVoltage(pid + ff)
+      shooterMotor.setVoltage(-(pid + ff))
+      feederMotor.setVoltage(-(pid + ff))
     } else {
       shooterMotor.set(0.0)
     }
