@@ -9,5 +9,4 @@ object IntakeConstants {
 
   /** Voltage to run intake motors at. */
   const val INTAKE_VOLTAGE = 0.1
-
 }

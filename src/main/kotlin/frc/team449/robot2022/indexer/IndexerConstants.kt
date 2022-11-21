@@ -9,5 +9,4 @@ object IndexerConstants {
 
   /** Voltage to run the indexer at. */
   const val DESIRED_VOLTAGE = 0.0
-
 }
