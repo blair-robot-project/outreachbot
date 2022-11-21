@@ -10,17 +10,16 @@ class Shooter(
   private val controller: PIDController,
   private val shooterMotor: WrappedMotor,
   private val feederMotor: WrappedMotor
-
 ) : SubsystemBase() {
 
-  var runShoot = false
+  private var runShoot = false
 
-  // Change runShoot to true.
+  // Starts the shooter by changing runShoot to true.
   fun runShooter() {
     runShoot = true
   }
 
-  // Change runShoot to false.
+  // Stops the shooter by changing runShoot to false.
   fun stopShooter() {
     runShoot = false
   }
@@ -28,8 +27,8 @@ class Shooter(
   // Uses PID and FF to calculate motor voltage.
   override fun periodic() {
     if (runShoot) {
-      val pid = controller.calculate(shooterMotor.velocity, ShooterConstants.shooterVel)
-      val ff = feedForward.calculate(ShooterConstants.shooterVel)
+      val pid = controller.calculate(shooterMotor.velocity, ShooterConstants.SHOOTER_VEL)
+      val ff = feedForward.calculate(ShooterConstants.SHOOTER_VEL)
 
       shooterMotor.setVoltage(-(pid + ff))
       feederMotor.setVoltage(-(pid + ff))

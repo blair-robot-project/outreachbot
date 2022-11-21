@@ -4,15 +4,14 @@ import frc.team449.system.motor.WrappedMotor
 
 class Indexer(
   private val indexMotor: WrappedMotor,
-  private val desiredVoltage: Double
 ) {
 
   fun forward() {
-    indexMotor.setVoltage(desiredVoltage)
+    indexMotor.setVoltage(IndexerConstants.DESIRED_VOLTAGE)
   }
 
   fun reverse() {
-    indexMotor.setVoltage(-desiredVoltage)
+    indexMotor.setVoltage(-IndexerConstants.DESIRED_VOLTAGE)
   }
 
   fun stop() {

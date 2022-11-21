@@ -7,18 +7,18 @@ class Intake(
   private val intakeMotor: WrappedMotor
 ) : SubsystemBase() {
 
-  // Run intake motor forwards
+  // Run intake motor forwards.
   fun runIntakeForward() {
-    intakeMotor.set(IntakeConstants.intakeVoltage)
+    intakeMotor.setVoltage(IntakeConstants.INTAKE_VOLTAGE)
   }
 
-  // Run intake motor reverse
+  // Run intake motor in reverse.
   fun runIntakeReverse() {
-    intakeMotor.set(-IntakeConstants.intakeVoltage)
+    intakeMotor.setVoltage(-IntakeConstants.INTAKE_VOLTAGE)
   }
 
-  // Stop intake motor
+  // Stop intake motor.
   fun stopIntake() {
-    intakeMotor.set(0.0)
+    intakeMotor.setVoltage(0.0)
   }
 }

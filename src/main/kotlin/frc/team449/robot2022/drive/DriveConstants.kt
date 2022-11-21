@@ -5,10 +5,10 @@ import edu.wpi.first.math.util.Units
 object DriveConstants {
 
   /** Drive motor ports */
-  const val DRIVE_MOTOR_FL = 0
-  const val DRIVE_MOTOR_FR = 1
-  const val DRIVE_MOTOR_BL = 2
-  const val DRIVE_MOTOR_BR = 3
+  const val DRIVE_MOTOR_FL = 1
+  const val DRIVE_MOTOR_FR = 2
+  const val DRIVE_MOTOR_BL = 3
+  const val DRIVE_MOTOR_BR = 4
 
   /** Feed forward values for driving each module */
   const val DRIVE_KS = 0.17227
@@ -33,7 +33,7 @@ object DriveConstants {
   const val TRANSLATION_DEADBAND = .08
   const val ROTATION_DEADBAND = .07
 
-  val CAMNAME = "PhotonCam"
+  val CAM_NAME = "PhotonCam"
 
   val WHEELBASE = Units.inchesToMeters(21.000)
   val TRACKWIDTH = Units.inchesToMeters(21.426)
