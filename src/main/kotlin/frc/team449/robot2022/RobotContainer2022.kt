@@ -84,12 +84,8 @@ class RobotContainer2022 : RobotContainerBase() {
   val indexer = Indexer(indexerMotor)
   val intake = Intake(intakeMotor)
   val shooter = Shooter(
-    SimpleMotorFeedforward(
-      ShooterConstants.SHOOTER_KS,
-      ShooterConstants.SHOOTER_KV,
-      ShooterConstants.SHOOTER_KA
-    ),
-    PIDController(0.0, 0.0, 0.0), shooterMotor, feederMotor
+    shooterMotor,
+    feederMotor
   )
 
   override fun teleopInit() {
@@ -97,12 +93,6 @@ class RobotContainer2022 : RobotContainerBase() {
       shooter::runShooter
     ).whenReleased(
       shooter::stopShooter
-    )
-
-    JoystickButton(driveController, XboxController.Button.kLeftBumper.value).whenPressed(
-      indexer::forward
-    ).whenReleased(
-      indexer::stop
     )
 
     JoystickButton(driveController, XboxController.Button.kRightBumper.value).whenPressed(
