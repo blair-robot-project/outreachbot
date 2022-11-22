@@ -12,6 +12,7 @@ import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.robot2022.drive.DriveConstants
 import frc.team449.system.AHRS
+import frc.team449.system.VisionCamera
 // import frc.team449.system.VisionCamera
 import frc.team449.system.encoder.NEOEncoder
 import frc.team449.system.motor.WrappedMotor
@@ -46,7 +47,7 @@ open class MecanumDrive(
   override val maxRotSpeed: Double,
   private val feedForward: SimpleMotorFeedforward,
   private val controller: () -> PIDController,
-//  private val cameras: MutableList<VisionCamera> = mutableListOf()
+  private val cameras: MutableList<VisionCamera> = mutableListOf()
 ) : HolonomicDrive, SubsystemBase() {
   init {
     ahrs.calibrate()
@@ -122,7 +123,7 @@ open class MecanumDrive(
     backLeftMotor.setVoltage(backLeftPID + backLeftFF)
     backRightMotor.setVoltage(backRightPID + backRightFF)
 
-    // if (cameras.isNotEmpty()) localize()
+    if (cameras.isNotEmpty()) localize()
 
     this.poseEstimator.update(
       heading,
@@ -135,20 +136,20 @@ open class MecanumDrive(
     )
   }
 
-//  fun addCamera(camera: VisionCamera) {
-//    cameras.add(camera)
-//  }
+  fun addCamera(camera: VisionCamera) {
+    cameras.add(camera)
+  }
 
-//  private fun localize() {
-//    for (camera in cameras) {
-//      if (camera.hasTarget()) {
-//        poseEstimator.addVisionMeasurement(
-//          camera.camPose(Pose3d(Transform3d())),
-//          camera.timestamp()
-//        )
-//      }
-//    }
-//  }
+  private fun localize() {
+    for (camera in cameras) {
+      if (camera.hasTarget()) {
+        poseEstimator.addVisionMeasurement(
+          camera.camPose(Pose3d(Transform3d())),
+          camera.timestamp()
+        )
+      }
+    }
+  }
 
   companion object {
     /** Create a new Mecanum Drive from DriveConstants */
