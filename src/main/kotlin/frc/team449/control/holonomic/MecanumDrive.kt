@@ -105,16 +105,16 @@ open class MecanumDrive(
     val backRightPID = brController.calculate(backRightMotor.velocity, desiredWheelSpeeds.rearRightMetersPerSecond)
 
     val frontLeftFF = feedForward.calculate(
-      frontLeftMotor.velocity
+      desiredWheelSpeeds.frontLeftMetersPerSecond
     )
     val frontRightFF = feedForward.calculate(
-      frontRightMotor.velocity
+      desiredWheelSpeeds.frontRightMetersPerSecond
     )
     val backLeftFF = feedForward.calculate(
-      backLeftMotor.velocity
+      desiredWheelSpeeds.rearLeftMetersPerSecond
     )
     val backRightFF = feedForward.calculate(
-      backRightMotor.velocity
+      desiredWheelSpeeds.rearRightMetersPerSecond
     )
 
     frontLeftMotor.setVoltage(frontLeftPID + frontLeftFF)
