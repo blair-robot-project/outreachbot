@@ -17,6 +17,7 @@ import frc.team449.system.VisionCamera
 import frc.team449.system.encoder.NEOEncoder
 import frc.team449.system.motor.WrappedMotor
 import frc.team449.system.motor.createSparkMax
+import io.github.oblarg.oblog.Loggable
 import io.github.oblarg.oblog.annotations.Log
 
 /**
@@ -48,7 +49,7 @@ open class MecanumDrive(
   private val feedForward: SimpleMotorFeedforward,
   private val controller: () -> PIDController,
   private val cameras: MutableList<VisionCamera> = mutableListOf()
-) : HolonomicDrive, SubsystemBase() {
+) : HolonomicDrive, SubsystemBase(), Loggable {
   init {
     ahrs.calibrate()
     ahrs.reset()
@@ -65,7 +66,7 @@ open class MecanumDrive(
   )
 
   private val poseEstimator = MecanumDrivePoseEstimator(
-    -ahrs.heading,
+    ahrs.heading,
     Pose2d(),
     kinematics,
     MatBuilder(Nat.N3(), Nat.N1()).fill(0.01, 0.01, 0.01),
@@ -75,7 +76,7 @@ open class MecanumDrive(
 
   override val heading: Rotation2d
     get() {
-      return -ahrs.heading
+      return ahrs.heading
     }
 
   override var pose: Pose2d
@@ -87,6 +88,7 @@ open class MecanumDrive(
       this.poseEstimator.resetPosition(value, heading)
     }
 
+  @Log.ToString
   private var desiredWheelSpeeds = MecanumDriveWheelSpeeds()
 
   override fun set(desiredSpeeds: ChassisSpeeds) {
@@ -144,7 +146,7 @@ open class MecanumDrive(
     for (camera in cameras) {
       if (camera.hasTarget()) {
         poseEstimator.addVisionMeasurement(
-          camera.camPose(Pose3d(Transform3d())),
+          camera.camPose(Pose3d(Transform3d())).toPose2d(),
           camera.timestamp()
         )
       }
@@ -155,10 +157,10 @@ open class MecanumDrive(
     /** Create a new Mecanum Drive from DriveConstants */
     fun createMecanum(ahrs: AHRS): MecanumDrive {
       return MecanumDrive(
-        createSparkMax("frontLeft", DriveConstants.DRIVE_MOTOR_FL, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING), inverted = true),
-        createSparkMax("frontRight", DriveConstants.DRIVE_MOTOR_FR, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
-        createSparkMax("backLeft", DriveConstants.DRIVE_MOTOR_BL, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING), inverted = true),
-        createSparkMax("backRight", DriveConstants.DRIVE_MOTOR_BR, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
+        createSparkMax("frontLeft", DriveConstants.DRIVE_MOTOR_FL, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
+        createSparkMax("frontRight", DriveConstants.DRIVE_MOTOR_FR, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING), inverted = true),
+        createSparkMax("backLeft", DriveConstants.DRIVE_MOTOR_BL, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
+        createSparkMax("backRight", DriveConstants.DRIVE_MOTOR_BR, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING), inverted = true),
         Translation2d(DriveConstants.WHEELBASE / 2, DriveConstants.TRACKWIDTH / 2),
         Translation2d(DriveConstants.WHEELBASE / 2, -DriveConstants.TRACKWIDTH / 2),
         Translation2d(-DriveConstants.WHEELBASE / 2, DriveConstants.TRACKWIDTH / 2),

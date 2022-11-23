@@ -8,5 +8,5 @@ object IndexerConstants {
   const val INDEXER_GEARING = 1.0
 
   /** Voltage to run the indexer at. */
-  const val DESIRED_VOLTAGE = 0.0
+  const val DESIRED_VOLTAGE = 1.5
 }

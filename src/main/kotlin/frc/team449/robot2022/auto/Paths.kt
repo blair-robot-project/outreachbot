@@ -18,7 +18,7 @@ object Paths {
     )
   val NEWFIELD =
     PathPlanner.loadPath(
-      "newfield",
+      "Example",
       AutoConstants.MAX_VEL,
       AutoConstants.MAX_ACC
     )

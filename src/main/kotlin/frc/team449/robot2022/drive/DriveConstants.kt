@@ -16,25 +16,25 @@ object DriveConstants {
   const val DRIVE_KA = 0.37064
 
   /** PID gains for driving each module*/
-  const val DRIVE_KP = 0.3
+  const val DRIVE_KP = 0.25
   const val DRIVE_KI = 0.0
   const val DRIVE_KD = 0.0
 
   /** Drive configuration */
-  const val DRIVE_GEARING = 1 / 6.75
-  val DRIVE_UPR = 2 * Math.PI * Units.inchesToMeters(6.0)
+  const val DRIVE_GEARING = 1 / 8.0
+  val DRIVE_UPR = Math.PI * Units.inchesToMeters(6.0)
   const val MAX_LINEAR_SPEED = .5
   const val MAX_ROT_SPEED = 2.5
-  const val MAX_ATTAINABLE_MODULE_SPEED = 4.267
-  const val MAX_ACCEL = 4.5
+  const val MAX_ATTAINABLE_MODULE_SPEED = 1.0
+  const val MAX_ACCEL = 5.0
 
   /** Controller Configurations */
   const val RATE_LIMIT = 1.5
-  const val TRANSLATION_DEADBAND = .08
-  const val ROTATION_DEADBAND = .07
+  const val TRANSLATION_DEADBAND = .125
+  const val ROTATION_DEADBAND = .125
 
   val CAM_NAME = "PhotonCam"
 
-  val WHEELBASE = Units.inchesToMeters(21.000)
-  val TRACKWIDTH = Units.inchesToMeters(21.426)
+  val WHEELBASE = Units.inchesToMeters(21.426)
+  val TRACKWIDTH = Units.inchesToMeters(21.000)
 }

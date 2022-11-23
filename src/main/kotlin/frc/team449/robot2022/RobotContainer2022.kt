@@ -1,7 +1,5 @@
 package frc.team449.robot2022
 
-import edu.wpi.first.math.controller.PIDController
-import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.SerialPort
@@ -63,7 +61,8 @@ class RobotContainer2022 : RobotContainerBase() {
   val indexerMotor = createSparkMax(
     "Indexer",
     IndexerConstants.INDEXER_ID,
-    NEOEncoder.creator(IndexerConstants.INDEXER_UPR, IndexerConstants.INDEXER_GEARING)
+    NEOEncoder.creator(IndexerConstants.INDEXER_UPR, IndexerConstants.INDEXER_GEARING),
+    inverted = true
   )
   val intakeMotor = createSparkMax(
     "Intake",
@@ -73,7 +72,8 @@ class RobotContainer2022 : RobotContainerBase() {
   val shooterMotor = createSparkMax(
     "Shooter",
     ShooterConstants.SHOOTER_ID,
-    NEOEncoder.creator(ShooterConstants.SHOOTER_UPR, ShooterConstants.SHOOTER_GEARING)
+    NEOEncoder.creator(ShooterConstants.SHOOTER_UPR, ShooterConstants.SHOOTER_GEARING),
+    inverted = true
   )
   val feederMotor = createSparkMax(
     "Feeder",
@@ -94,6 +94,10 @@ class RobotContainer2022 : RobotContainerBase() {
     ).whenReleased(
       shooter::stopShooter
     )
+
+//    JoystickButton(driveController, XboxController.Button.kB.value).whenPressed(
+//      indexer::toggleForward
+//    )
 
     JoystickButton(driveController, XboxController.Button.kRightBumper.value).whenPressed(
       intake::runIntakeForward

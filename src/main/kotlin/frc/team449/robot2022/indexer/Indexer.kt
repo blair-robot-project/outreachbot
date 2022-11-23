@@ -6,15 +6,15 @@ class Indexer(
   private val indexMotor: WrappedMotor,
 ) {
 
-  private var forward = false
-
   init {
     indexMotor.setVoltage(IndexerConstants.DESIRED_VOLTAGE)
   }
 
+  private var forward = false
+
 //  fun toggleForward() {
 //    forward = if (forward) {
-//      stop()
+//      indexMotor.setVoltage(0.0)
 //      false
 //    }
 //    else {
@@ -22,8 +22,4 @@ class Indexer(
 //      true
 //    }
 //  }
-//ermumgrei
-  fun stop() {
-    indexMotor.setVoltage(0.0)
-  }
 }

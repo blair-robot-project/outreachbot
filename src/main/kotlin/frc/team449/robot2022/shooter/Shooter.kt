@@ -4,12 +4,14 @@ import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.system.motor.WrappedMotor
+import io.github.oblarg.oblog.Loggable
+import io.github.oblarg.oblog.annotations.Log
 import kotlin.math.abs
 
 class Shooter(
   private val shooterMotor: WrappedMotor,
   private val feederMotor: WrappedMotor
-) : SubsystemBase() {
+) : SubsystemBase(), Loggable {
 
   private var runShoot = false
   private var shooterController = PIDController(
@@ -22,6 +24,9 @@ class Shooter(
     ShooterConstants.SHOOTER_KV,
     ShooterConstants.SHOOTER_KA
   )
+
+  @Log.Graph
+  private var shooterSpeed = 0.0
 
   // Starts the shooter by changing runShoot to true.
   fun runShooter() {
@@ -42,6 +47,7 @@ class Shooter(
 
   // Uses PID and FF to calculate motor voltage.
   override fun periodic() {
+    shooterSpeed = shooterMotor.velocity
     if (runShoot) {
       val shooterPID = shooterController.calculate(shooterMotor.velocity, ShooterConstants.SHOOTER_VEL)
       val shooterFF = shooterFF.calculate(ShooterConstants.SHOOTER_VEL)

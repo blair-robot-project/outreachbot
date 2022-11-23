@@ -8,5 +8,5 @@ object IntakeConstants {
   const val INTAKE_GEARING = 1.0
 
   /** Voltage to run intake motors at. */
-  const val INTAKE_VOLTAGE = 0.1
+  const val INTAKE_VOLTAGE = 3.5
 }
