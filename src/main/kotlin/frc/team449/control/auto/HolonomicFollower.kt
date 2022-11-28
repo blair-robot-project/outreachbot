@@ -31,16 +31,18 @@ class HolonomicFollower(
   maxRotAcc: Double,
   private val translationTol: Double = .05,
   private val angleTol: Double = 0.05,
-  private val timeout: Double = 5.0
+  private val timeout: Double = 5.0,
+  translation_kP: Double = AutoConstants.TRANSLATION_KP,
+  rotation_kP: Double = AutoConstants.ROTATION_KP
 ) : CommandBase() {
 
   private val timer = Timer()
   private var prevTime = 0.0
 
-  private var xController = PIDController(AutoConstants.TRANSLATION_KP, .0, .0)
-  private var yController = PIDController(AutoConstants.TRANSLATION_KP, .0, .0)
+  private var xController = PIDController(translation_kP, .0, .0)
+  private var yController = PIDController(translation_kP, .0, .0)
   private var thetaController = ProfiledPIDController(
-    AutoConstants.ROTATION_KP, .0, .0,
+    rotation_kP, .0, .0,
     TrapezoidProfile.Constraints(maxRotVel, maxRotAcc)
   )
   private val controller = HolonomicDriveController(
@@ -83,7 +85,7 @@ class HolonomicFollower(
   }
 
   override fun isFinished(): Boolean {
-    return (timer.hasElapsed(trajectory.totalTimeSeconds) && inTolerance()) // TODO: add after testing || (timer.hasElapsed(trajectory.totalTimeSeconds + timeout))
+    return (timer.hasElapsed(trajectory.totalTimeSeconds) && inTolerance()) || (timer.hasElapsed(trajectory.totalTimeSeconds + timeout))
   }
 
   override fun end(interrupted: Boolean) {

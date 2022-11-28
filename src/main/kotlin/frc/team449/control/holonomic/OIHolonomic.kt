@@ -2,6 +2,8 @@ package frc.team449.control.holonomic
 
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.filter.SlewRateLimiter
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.util.sendable.Sendable
 import edu.wpi.first.util.sendable.SendableBuilder
@@ -92,15 +94,26 @@ class OIHolonomic(
     val rotRaw = rotThrottle.asDouble
     val rotScaled = rotRamp.calculate(rotRaw * drive.maxRotSpeed)
 
+    // translation velocity vector
+    val vel = Translation2d(xClamped, yClamped)
+
     return if (this.fieldOriented()) {
+      /** Quick fix for the velocity skewing towards the direction of rotation
+       * by rotating it with offset proportional to how much we are rotating
+       * */
+      vel.rotateBy(Rotation2d(-rotScaled * dt / 2))
       ChassisSpeeds.fromFieldRelativeSpeeds(
-        xClamped,
-        yClamped,
+        vel.x,
+        vel.y,
         rotScaled,
         drive.heading
       )
     } else {
-      ChassisSpeeds(xClamped, yClamped, rotScaled)
+      ChassisSpeeds(
+        vel.x,
+        vel.y,
+        rotScaled
+      )
     }
   }
 
@@ -118,7 +131,6 @@ class OIHolonomic(
   }
 
   companion object {
-    // TODO: My controller at home doesn't need to negate the leftY and leftX. Check if our contorllers do.
     fun createHolonomicOI(drive: HolonomicDrive, driveController: XboxController): OIHolonomic {
       return OIHolonomic(
         drive,

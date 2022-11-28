@@ -22,4 +22,11 @@ object Paths {
       AutoConstants.MAX_VEL,
       AutoConstants.MAX_ACC
     )
+
+  val ALIGN =
+    PathPlanner.loadPath(
+      "Simple",
+      1.0,
+      1.0
+    )
 }
