@@ -53,6 +53,7 @@ open class MecanumDrive(
   init {
     ahrs.calibrate()
     ahrs.reset()
+    ahrs.heading = DriveConstants.GYRO_OFFSET
   }
   private val flController = controller()
   private val frController = controller()
@@ -72,12 +73,13 @@ open class MecanumDrive(
     ahrs.heading,
     Pose2d(),
     kinematics,
-    MatBuilder(Nat.N3(), Nat.N1()).fill(0.0125, 0.0125, 0.0125),
-    MatBuilder(Nat.N1(), Nat.N1()).fill(0.015),
-    MatBuilder(Nat.N3(), Nat.N1()).fill(.005, .005, .00002)
+    MatBuilder(Nat.N3(), Nat.N1()).fill(0.01, 0.01, 0.01),
+    MatBuilder(Nat.N1(), Nat.N1()).fill(.0075),
+    MatBuilder(Nat.N3(), Nat.N1()).fill(.0075, .0075, .005)
   )
 
   override val heading: Rotation2d
+    @Log.ToString
     get() {
       return ahrs.heading
     }

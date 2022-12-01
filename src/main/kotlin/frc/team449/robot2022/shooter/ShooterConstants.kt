@@ -23,7 +23,7 @@ object ShooterConstants {
   const val FEEDER_UPR = 1.0
   const val FEEDER_GEARING = 1.0
 
-  const val SHOOTER_VEL = 42.5 // TODO - test for the values
+  const val SHOOTER_VEL = 52.5 // TODO - test for the values
   const val DELTA_TIME = 0.02 // TODO - test for the values
-  const val TOLERANCE = 0.5 // TODO - test for the values
+  const val TOLERANCE = 0.4 // TODO - test for the values
 }

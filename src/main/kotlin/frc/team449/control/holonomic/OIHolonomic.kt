@@ -134,8 +134,8 @@ class OIHolonomic(
     fun createHolonomicOI(drive: HolonomicDrive, driveController: XboxController): OIHolonomic {
       return OIHolonomic(
         drive,
-        { if (abs(driveController.leftY) < DriveConstants.TRANSLATION_DEADBAND) .0 else driveController.leftY },
-        { if (abs(driveController.leftX) < DriveConstants.TRANSLATION_DEADBAND) .0 else driveController.leftX },
+        { if (abs(driveController.leftY) < DriveConstants.TRANSLATION_DEADBAND) .0 else -driveController.leftY },
+        { if (abs(driveController.leftX) < DriveConstants.TRANSLATION_DEADBAND) .0 else -driveController.leftX },
         { if (abs(driveController.getRawAxis(4)) < DriveConstants.ROTATION_DEADBAND) .0 else -driveController.getRawAxis(4) },
         SlewRateLimiter(DriveConstants.RATE_LIMIT),
         DriveConstants.MAX_ACCEL,

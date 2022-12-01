@@ -1,5 +1,6 @@
 package frc.team449.robot2022.drive
 
+import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform3d
 import edu.wpi.first.math.util.Units
 
@@ -36,6 +37,7 @@ object DriveConstants {
 
   val CAM_NAME = "gloworm"
   val ROBOT_TO_CAM = Transform3d()
+  val GYRO_OFFSET = Rotation2d.fromDegrees(180.0)
 
   val WHEELBASE = Units.inchesToMeters(21.426)
   val TRACKWIDTH = Units.inchesToMeters(21.000)
