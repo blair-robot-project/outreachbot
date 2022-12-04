@@ -53,6 +53,7 @@ open class MecanumDrive(
   init {
     ahrs.calibrate()
     ahrs.reset()
+    ahrs.heading = DriveConstants.GYRO_OFFSET
   }
   private val flController = controller()
   private val frController = controller()
@@ -65,16 +66,20 @@ open class MecanumDrive(
     frontLeftLocation, frontRightLocation, backLeftLocation, backRightLocation
   )
 
+  @Log.ToString
+  private var camPose: Pose2d = Pose2d()
+
   private val poseEstimator = MecanumDrivePoseEstimator(
     ahrs.heading,
     Pose2d(),
     kinematics,
     MatBuilder(Nat.N3(), Nat.N1()).fill(0.01, 0.01, 0.01),
-    MatBuilder(Nat.N1(), Nat.N1()).fill(0.01),
-    MatBuilder(Nat.N3(), Nat.N1()).fill(.005, .005, .0005)
+    MatBuilder(Nat.N1(), Nat.N1()).fill(.0075),
+    MatBuilder(Nat.N3(), Nat.N1()).fill(.0075, .0075, .005)
   )
 
   override val heading: Rotation2d
+    @Log.ToString
     get() {
       return ahrs.heading
     }
@@ -138,15 +143,12 @@ open class MecanumDrive(
     )
   }
 
-  fun addCamera(camera: VisionCamera) {
-    cameras.add(camera)
-  }
-
   private fun localize() {
     for (camera in cameras) {
       if (camera.hasTarget()) {
+        camPose = camera.camPose(Pose3d()).toPose2d()
         poseEstimator.addVisionMeasurement(
-          camera.camPose(Pose3d(Transform3d())).toPose2d(),
+          camPose,
           camera.timestamp()
         )
       }
@@ -169,7 +171,8 @@ open class MecanumDrive(
         DriveConstants.MAX_LINEAR_SPEED,
         DriveConstants.MAX_ROT_SPEED,
         SimpleMotorFeedforward(DriveConstants.DRIVE_KS, DriveConstants.DRIVE_KV, DriveConstants.DRIVE_KA),
-        { PIDController(DriveConstants.DRIVE_KP, DriveConstants.DRIVE_KI, DriveConstants.DRIVE_KD) }
+        { PIDController(DriveConstants.DRIVE_KP, DriveConstants.DRIVE_KI, DriveConstants.DRIVE_KD) },
+        mutableListOf(VisionCamera(DriveConstants.CAM_NAME, DriveConstants.ROBOT_TO_CAM))
       )
     }
 

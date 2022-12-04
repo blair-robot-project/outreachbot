@@ -13,13 +13,13 @@ class VisionCamera(
   }
 
   /**
-   * @param targetPose the pose of the target [ex. Apriltag, reflective tape, etc] on the the field
+   * @param fieldToTarget the pose of the target [ex. Apriltag, reflective tape, etc] on the the field
    * @return the pose of the camera in relative to the field
    */
-  fun camPose(targetPose: Pose3d): Pose3d {
+  fun camPose(fieldToTarget: Pose3d): Pose3d {
     val result = latestResult
     val camToTarget: Transform3d = result.bestTarget.bestCameraToTarget
-    val fieldToCam: Pose3d = targetPose.transformBy(camToTarget.inverse())
+    val fieldToCam: Pose3d = fieldToTarget.transformBy(camToTarget.inverse())
 //    val camPose2d = fieldToCam.toPose2d()
     return fieldToCam.transformBy(robotToCamera.inverse())
   }

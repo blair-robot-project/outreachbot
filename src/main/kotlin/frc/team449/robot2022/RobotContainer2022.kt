@@ -12,6 +12,7 @@ import frc.team449.control.holonomic.MecanumDrive.Companion.createMecanum
 import frc.team449.control.holonomic.MecanumDrive.Companion.simDrive
 import frc.team449.control.holonomic.OIHolonomic.Companion.createHolonomicOI
 import frc.team449.robot2022.auto.Example
+import frc.team449.robot2022.drive.VisionDrive
 import frc.team449.robot2022.indexer.Indexer
 import frc.team449.robot2022.indexer.IndexerConstants
 import frc.team449.robot2022.intake.Intake
@@ -93,6 +94,10 @@ class RobotContainer2022 : RobotContainerBase() {
       shooter::runShooter
     ).whenReleased(
       shooter::stopShooter
+    )
+
+    JoystickButton(driveController, XboxController.Button.kX.value).whenPressed(
+      VisionDrive(this).routine()
     )
 
 //    JoystickButton(driveController, XboxController.Button.kB.value).whenPressed(
