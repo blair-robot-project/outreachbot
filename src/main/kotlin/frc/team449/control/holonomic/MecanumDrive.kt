@@ -50,11 +50,7 @@ open class MecanumDrive(
   private val controller: () -> PIDController,
   private val cameras: MutableList<VisionCamera> = mutableListOf()
 ) : HolonomicDrive, SubsystemBase(), Loggable {
-  init {
-    ahrs.calibrate()
-    ahrs.reset()
-    ahrs.heading = DriveConstants.GYRO_OFFSET
-  }
+
   private val flController = controller()
   private val frController = controller()
   private val blController = controller()
@@ -71,11 +67,11 @@ open class MecanumDrive(
 
   private val poseEstimator = MecanumDrivePoseEstimator(
     ahrs.heading,
-    Pose2d(),
+    DriveConstants.INITAL_POSE,
     kinematics,
     MatBuilder(Nat.N3(), Nat.N1()).fill(0.01, 0.01, 0.01),
-    MatBuilder(Nat.N1(), Nat.N1()).fill(.0075),
-    MatBuilder(Nat.N3(), Nat.N1()).fill(.0075, .0075, .005)
+    MatBuilder(Nat.N1(), Nat.N1()).fill(.00075),
+    MatBuilder(Nat.N3(), Nat.N1()).fill(.0075, .0075, .0005)
   )
 
   override val heading: Rotation2d
@@ -95,6 +91,12 @@ open class MecanumDrive(
 
   @Log.ToString
   private var desiredWheelSpeeds = MecanumDriveWheelSpeeds()
+
+  init {
+    ahrs.calibrate()
+    ahrs.reset()
+    ahrs.heading = DriveConstants.GYRO_OFFSET
+  }
 
   override fun set(desiredSpeeds: ChassisSpeeds) {
     desiredWheelSpeeds = kinematics.toWheelSpeeds(desiredSpeeds)

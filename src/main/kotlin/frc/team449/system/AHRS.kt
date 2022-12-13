@@ -29,7 +29,8 @@ class AHRS(private val navx: com.kauailabs.navx.frc.AHRS) : Gyro by navx {
 
   /**
    * Used to set properties of an [AHRS] object during simulation. See
-   * https://pdocs.kauailabs.com/navx-mxp/software/roborio-libraries/java/
+   * https://pdocs.kauailabs.com/navx-mxp/softwa
+   * re/roborio-libraries/java/
    *
    * @param devName The name of the simulated device.
    * @param index The NavX index.
