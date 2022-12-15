@@ -19,12 +19,14 @@ class VisionDrive(
     val cmd = SequentialCommandGroup(
       HolonomicFollower(
         robot.drive,
-        traj, false,
+        traj,
+        false,
         AutoConstants.MAX_ROTVEL,
         AutoConstants.MAX_ROTACC,
-        timeout = 8.75,
-        translation_kP = 0.5,
-        rotation_kP = 1.0
+        timeout = 17.5, // 8.75,
+        translationTol = 0.001,
+        translation_kP = 0.45,
+        rotation_kP = 0.05
       ),
       InstantCommand(robot.shooter::runShooter),
       WaitCommand(7.5),

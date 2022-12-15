@@ -21,7 +21,8 @@ class VisionCamera(
     val camToTarget: Transform3d = result.bestTarget.bestCameraToTarget
     val fieldToCam: Pose3d = fieldToTarget.transformBy(camToTarget.inverse())
 //    val camPose2d = fieldToCam.toPose2d()
-    return fieldToCam.transformBy(robotToCamera.inverse())
+    return fieldToTarget.plus(camToTarget.inverse()).plus(robotToCamera.inverse())
+//    return fieldToCam.transformBy(robotToCamera.inverse())
   }
 
   /**

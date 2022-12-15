@@ -19,7 +19,7 @@ object DriveConstants {
   const val DRIVE_KA = 0.29862
 
   /** PID gains for driving each module*/
-  const val DRIVE_KP = 0.25
+  const val DRIVE_KP = 0.35
   const val DRIVE_KI = 0.0
   const val DRIVE_KD = 0.0
 
@@ -38,7 +38,7 @@ object DriveConstants {
 
   val CAM_NAME = "gloworm"
   val ROBOT_TO_CAM = Transform3d()
-  val GYRO_OFFSET = Rotation2d.fromDegrees(0.0)
+  val GYRO_OFFSET = Rotation2d.fromDegrees(-180.0)
   val INITAL_POSE = Pose2d(0.0, 0.0, GYRO_OFFSET)
 
   val WHEELBASE = Units.inchesToMeters(21.426)

@@ -65,13 +65,13 @@ open class MecanumDrive(
   @Log.ToString
   private var camPose: Pose2d = Pose2d()
 
-  private val poseEstimator = MecanumDrivePoseEstimator(
-    ahrs.heading,
+  private val poseEstimator: MecanumDrivePoseEstimator = MecanumDrivePoseEstimator(
+    DriveConstants.GYRO_OFFSET,
     DriveConstants.INITAL_POSE,
     kinematics,
     MatBuilder(Nat.N3(), Nat.N1()).fill(0.01, 0.01, 0.01),
-    MatBuilder(Nat.N1(), Nat.N1()).fill(.00075),
-    MatBuilder(Nat.N3(), Nat.N1()).fill(.0075, .0075, .0005)
+    MatBuilder(Nat.N1(), Nat.N1()).fill(.005),
+    MatBuilder(Nat.N3(), Nat.N1()).fill(.0065, .0065, .0025)
   )
 
   override val heading: Rotation2d
@@ -91,12 +91,6 @@ open class MecanumDrive(
 
   @Log.ToString
   private var desiredWheelSpeeds = MecanumDriveWheelSpeeds()
-
-  init {
-    ahrs.calibrate()
-    ahrs.reset()
-    ahrs.heading = DriveConstants.GYRO_OFFSET
-  }
 
   override fun set(desiredSpeeds: ChassisSpeeds) {
     desiredWheelSpeeds = kinematics.toWheelSpeeds(desiredSpeeds)
@@ -148,7 +142,8 @@ open class MecanumDrive(
   private fun localize() {
     for (camera in cameras) {
       if (camera.hasTarget()) {
-        camPose = camera.camPose(Pose3d()).toPose2d()
+        camPose = Pose2d(camera.latestResult.bestTarget.bestCameraToTarget.x, camera.latestResult.bestTarget.bestCameraToTarget.y, Rotation2d(camera.latestResult.bestTarget.bestCameraToTarget.rotation.z))
+//        camPose(Pose3d(Translation3d(0.0, 0.0, 1.5), Rotation3d(0.0, 0.0, -180.0))).toPose2d()
         poseEstimator.addVisionMeasurement(
           camPose,
           camera.timestamp()

@@ -16,7 +16,7 @@ class AHRS(private val navx: com.kauailabs.navx.frc.AHRS) : Gyro by navx {
       return -Rotation2d.fromDegrees(headingOffset + this.navx.fusedHeading)
     }
     set(newHeading) {
-      this.headingOffset = newHeading.degrees - this.navx.fusedHeading
+      this.headingOffset = -newHeading.degrees - this.navx.fusedHeading
     }
 
   constructor(port: SerialPort.Port = SerialPort.Port.kMXP) : this(com.kauailabs.navx.frc.AHRS(port))
