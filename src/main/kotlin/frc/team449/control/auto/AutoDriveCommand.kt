@@ -2,7 +2,6 @@ package frc.team449.control.auto
 
 import com.pathplanner.lib.PathPlannerTrajectory
 import edu.wpi.first.math.controller.HolonomicDriveController
-import edu.wpi.first.math.controller.RamseteController
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.Timer
@@ -10,7 +9,6 @@ import edu.wpi.first.wpilibj.shuffleboard.EventImportance
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.team449.control.DriveSubsystem
-import frc.team449.control.differential.DifferentialDrive
 import frc.team449.control.holonomic.HolonomicDrive
 
 /**
@@ -87,22 +85,6 @@ class AutoDriveCommand<T : DriveSubsystem>(
             desiredState,
             desiredState.holonomicRotation
           )
-        },
-        resetPose
-      )
-    }
-
-    fun differentialDriveCommand(
-      drivetrain: DifferentialDrive,
-      trajectory: PathPlannerTrajectory,
-      resetPose: Boolean
-    ): AutoDriveCommand<DifferentialDrive> {
-      val controller = RamseteController()
-      return AutoDriveCommand(
-        drivetrain,
-        trajectory,
-        { currentPose, desiredState ->
-          controller.calculate(currentPose, desiredState)
         },
         resetPose
       )

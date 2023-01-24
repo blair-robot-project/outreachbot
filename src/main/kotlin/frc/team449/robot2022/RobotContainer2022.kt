@@ -1,19 +1,17 @@
 package frc.team449.robot2022
 
 import edu.wpi.first.wpilibj.PowerDistribution
-import edu.wpi.first.wpilibj.RobotBase.isReal
 import edu.wpi.first.wpilibj.SerialPort
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
+import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import frc.team449.RobotContainerBase
 import frc.team449.control.auto.AutoRoutine
 import frc.team449.control.holonomic.MecanumDrive.Companion.createMecanum
-import frc.team449.control.holonomic.MecanumDrive.Companion.simDrive
 import frc.team449.control.holonomic.OIHolonomic.Companion.createHolonomicOI
 import frc.team449.robot2022.auto.Example
 import frc.team449.robot2022.drive.DriveConstants
-import frc.team449.robot2022.drive.VisionDrive
 import frc.team449.robot2022.indexer.Indexer
 import frc.team449.robot2022.indexer.IndexerConstants
 import frc.team449.robot2022.intake.Intake
@@ -41,15 +39,9 @@ class RobotContainer2022 : RobotContainerBase() {
     PowerDistribution(PDP_CAN, PowerDistribution.ModuleType.kCTRE)
 
   @Log.Include
-  val drive = if (isReal()) createMecanum(ahrs) else simDrive(ahrs)
+  val drive = createMecanum(ahrs)
 
   val oi = createHolonomicOI(drive, driveController)
-
-  // create shooter here
-
-  // create intake here
-
-  // create indexer here
 
   override val autoChooser = addRoutines()
 
@@ -91,24 +83,30 @@ class RobotContainer2022 : RobotContainerBase() {
   )
 
   override fun teleopInit() {
-    JoystickButton(driveController, XboxController.Button.kA.value).whenPressed(
-      shooter::runShooter
-    ).whenReleased(
-      shooter::stopShooter
+    JoystickButton(driveController, XboxController.Button.kA.value).onTrue(
+      InstantCommand(shooter::runShooter)
+    ).onFalse(
+      InstantCommand(shooter::stopShooter)
     )
 
-    JoystickButton(driveController, XboxController.Button.kX.value).whenPressed(
-      VisionDrive(this).routine()
-    )
+//     JoystickButton(driveController, XboxController.Button.kX.value).onTrue(
+//        PoseAlign(
+//          this,
+//          Pose2d(2.75, 0.0, Rotation2d(0.0)),
+//          PIDController(0.75, 0.0, 0.0),
+//          PIDController(1.25, 0.0, 0.0),
+//          PIDController(0.75, 0.0, 0.0)
+//        ).generateCommand()
+//     )
 
 //    JoystickButton(driveController, XboxController.Button.kB.value).whenPressed(
 //      indexer::toggleForward
 //    )
 
-    JoystickButton(driveController, XboxController.Button.kRightBumper.value).whenPressed(
-      intake::runIntakeForward
-    ).whenReleased(
-      intake::stopIntake
+    JoystickButton(driveController, XboxController.Button.kRightBumper.value).onTrue(
+      InstantCommand(intake::runIntakeForward)
+    ).onFalse(
+      InstantCommand(intake::stopIntake)
     )
   }
 

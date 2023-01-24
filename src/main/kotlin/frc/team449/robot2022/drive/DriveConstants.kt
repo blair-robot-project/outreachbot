@@ -1,6 +1,9 @@
 package frc.team449.robot2022.drive
 
+import edu.wpi.first.apriltag.AprilTag
+import edu.wpi.first.apriltag.AprilTagFieldLayout
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform3d
 import edu.wpi.first.math.util.Units
@@ -26,7 +29,7 @@ object DriveConstants {
   /** Drive configuration */
   const val DRIVE_GEARING = 1 / 8.0
   val DRIVE_UPR = Math.PI * Units.inchesToMeters(6.0)
-  const val MAX_LINEAR_SPEED = 1.5
+  const val MAX_LINEAR_SPEED = 1.5 // 1.5
   const val MAX_ROT_SPEED = 2.5
   const val MAX_ATTAINABLE_MODULE_SPEED = (12 - DRIVE_KS) / DRIVE_KV
   const val MAX_ACCEL = 5.0
@@ -38,6 +41,8 @@ object DriveConstants {
 
   val CAM_NAME = "gloworm"
   val ROBOT_TO_CAM = Transform3d()
+  val TAG_LAYOUT = AprilTagFieldLayout(listOf(AprilTag(0, Pose3d())), 16.4846, 8.1026)
+
   val GYRO_OFFSET = Rotation2d.fromDegrees(-180.0)
   val INITAL_POSE = Pose2d(0.0, 0.0, GYRO_OFFSET)
 

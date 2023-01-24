@@ -1,100 +1,104 @@
 package frc.team449.control.auto
 
 import com.pathplanner.lib.PathPlannerTrajectory
-import edu.wpi.first.math.controller.HolonomicDriveController
+import com.pathplanner.lib.controllers.PPHolonomicDriveController
 import edu.wpi.first.math.controller.PIDController
-import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.trajectory.TrapezoidProfile
+import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.team449.control.holonomic.HolonomicDrive
 import frc.team449.robot2022.auto.AutoConstants
 import kotlin.math.PI
-import kotlin.math.abs
 
 /**
  * @param drivetrain Holonomic Drivetrain used
- * @param trajectory Pathplanner trajectory to follow
- * @param resetPose Whether to reset the robot pose to the first pose in the trajectory
- * @param maxRotAcc Max rotational acceleration
- * @param maxRotVel Max rotational velocity
- * @param translationTol Tolerance between the translation of the actual and desired end pose of the trajectory in meters
- * @param angleTol Tolerance between the angle of the actual and desired end pose of the trajectory in radians
- * @param timeout Maximum time to wait for the robot to fix its end pose. Gives an upper bound of the time the trajectory takes
+ * @param trajectory Path Planner trajectory to follow
+ * @param xController The PIDController you want to use for correcting translational X error
+ * @param yController The PIDController you want to use for correcting translational Y error
+ * @param thetaController The PIDController you want to use for correcting rotational error
+ * @param resetPose Whether to reset the drivetrain pose to the inital trajectory pose
+ * @param poseTol Tolerance for the robot to be in by the end of the command
+ * @param timeout Time to wait after trajectory is finished for the robot to correct its end pose; overrides poseTol
  */
 class HolonomicFollower(
   private val drivetrain: HolonomicDrive,
   private val trajectory: PathPlannerTrajectory,
-  private val resetPose: Boolean,
-  maxRotVel: Double,
-  maxRotAcc: Double,
-  private val translationTol: Double = .05,
-  private val angleTol: Double = 0.05,
-  private val timeout: Double = 5.0,
-  translation_kP: Double = AutoConstants.TRANSLATION_KP,
-  rotation_kP: Double = AutoConstants.ROTATION_KP
+  private val xController: PIDController = PIDController(AutoConstants.DEFAULT_X_KP, 0.0, 0.0),
+  private val yController: PIDController = PIDController(AutoConstants.DEFAULT_Y_KP, 0.0, 0.0),
+  private val thetaController: PIDController = PIDController(AutoConstants.DEFAULT_ROTATION_KP, 0.0, 0.0),
+  poseTol: Pose2d = Pose2d(0.05, 0.05, Rotation2d(0.05)),
+  private val timeout: Double = 1.0,
+  private val resetPose: Boolean = false
 ) : CommandBase() {
 
   private val timer = Timer()
   private var prevTime = 0.0
 
-  private var xController = PIDController(translation_kP, .0, .0)
-  private var yController = PIDController(translation_kP, .0, .0)
-  private var thetaController = ProfiledPIDController(
-    rotation_kP, .0, .0,
-    TrapezoidProfile.Constraints(maxRotVel, maxRotAcc)
-  )
-  private val controller = HolonomicDriveController(
+  private val controller = PPHolonomicDriveController(
     xController, yController, thetaController
   )
 
   init {
+    // require the drivetrain to interrupt
+    addRequirements(drivetrain)
+
+    if (resetPose) {
+      drivetrain.pose = trajectory.initialHolonomicPose
+    }
+
+    // controlling heading which is circular, [0, 2*PI)
     thetaController.enableContinuousInput(.0, 2 * PI)
+
+    controller.setTolerance(poseTol)
   }
 
   override fun initialize() {
-    if (resetPose) {
-      val start = trajectory.initialState as PathPlannerTrajectory.PathPlannerState
-      drivetrain.pose = Pose2d(start.poseMeters.x, start.poseMeters.y, start.holonomicRotation)
-    }
 
+    // reset the controllers so that the error from last run doesn't transfer
     xController.reset()
     yController.reset()
-    thetaController.reset(drivetrain.pose.rotation.radians)
+    thetaController.reset()
 
+    // reset timer from last run and restart for this run
     timer.reset()
     timer.start()
   }
 
   override fun execute() {
     val currTime = timer.get()
+
+    // TODO: Uncomment once creating paths for competition use instead of testing
+    // MAKE SURE YOUR ORIGINAL PATH IS FOR THE BLUE ALLIANCE
+//    val reference = PathPlannerTrajectory.transformStateForAlliance(
+//      trajectory.sample(currTime) as PathPlannerTrajectory.PathPlannerState,
+//      DriverStation.getAlliance()
+//    )
     val reference = trajectory.sample(currTime) as PathPlannerTrajectory.PathPlannerState
+
     val currentPose = drivetrain.pose
 
     drivetrain.set(
       controller.calculate(
         currentPose,
-        reference.poseMeters,
-        reference.velocityMetersPerSecond,
-        reference.holonomicRotation
+        reference
       )
     )
 
     prevTime = currTime
   }
 
+  /**
+   * @return if the robot reached ending position by estimated end time
+   */
   override fun isFinished(): Boolean {
-    return (timer.hasElapsed(trajectory.totalTimeSeconds) && inTolerance()) || (timer.hasElapsed(trajectory.totalTimeSeconds + timeout))
+    return (timer.hasElapsed(trajectory.totalTimeSeconds) && controller.atReference()) ||
+      timer.hasElapsed(trajectory.totalTimeSeconds + timeout)
   }
 
   override fun end(interrupted: Boolean) {
     timer.stop()
+    timer.reset()
     drivetrain.stop()
-  }
-
-  private fun inTolerance(): Boolean {
-    val endError = trajectory.endState.poseMeters.relativeTo(drivetrain.pose)
-    return abs(endError.x) < translationTol && abs(endError.y) < translationTol && abs(endError.rotation.radians) < angleTol
   }
 }

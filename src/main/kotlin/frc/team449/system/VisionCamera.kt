@@ -1,28 +1,26 @@
 package frc.team449.system
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout
 import edu.wpi.first.math.geometry.*
 import org.photonvision.PhotonCamera
 import org.photonvision.common.hardware.VisionLEDMode
 
 class VisionCamera(
   cameraName: String,
-  private val robotToCamera: Transform3d = Transform3d()
+  private val robotToCamera: Transform3d = Transform3d(),
+  private val tagLayout: AprilTagFieldLayout
 ) : PhotonCamera(cameraName) {
   init {
     setLED(VisionLEDMode.kOff)
   }
 
   /**
-   * @param fieldToTarget the pose of the target [ex. Apriltag, reflective tape, etc] on the the field
    * @return the pose of the camera in relative to the field
    */
-  fun camPose(fieldToTarget: Pose3d): Pose3d {
-    val result = latestResult
-    val camToTarget: Transform3d = result.bestTarget.bestCameraToTarget
-    val fieldToCam: Pose3d = fieldToTarget.transformBy(camToTarget.inverse())
-//    val camPose2d = fieldToCam.toPose2d()
-    return fieldToTarget.plus(camToTarget.inverse()).plus(robotToCamera.inverse())
-//    return fieldToCam.transformBy(robotToCamera.inverse())
+  fun camPose(): Pose3d {
+    val targetPose: Pose3d = tagLayout.getTagPose(latestResult.bestTarget.fiducialId).get()
+    val cameraToTarget = latestResult.bestTarget.bestCameraToTarget
+    return targetPose.plus(cameraToTarget.inverse()).plus(robotToCamera.inverse())
   }
 
   /**

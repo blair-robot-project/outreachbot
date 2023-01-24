@@ -9,6 +9,7 @@ object AutoConstants {
   const val MAX_ROTACC = 1.0
 
   /** PID gains */
-  const val TRANSLATION_KP = 1.25
-  const val ROTATION_KP = 1.0
+  const val DEFAULT_X_KP = 0.35
+  const val DEFAULT_Y_KP = 0.35
+  const val DEFAULT_ROTATION_KP = 0.75
 }
