@@ -22,6 +22,10 @@ import frc.team449.system.motor.WrappedMotor
 import frc.team449.system.motor.createSparkMax
 import io.github.oblarg.oblog.Loggable
 import io.github.oblarg.oblog.annotations.Log
+import org.photonvision.EstimatedRobotPose
+import org.photonvision.PhotonPoseEstimator
+import java.util.Optional
+import kotlin.reflect.typeOf
 
 /**
  * @param frontLeftMotor the front left motor
@@ -51,7 +55,7 @@ open class MecanumDrive(
   override val maxRotSpeed: Double,
   private val feedForward: SimpleMotorFeedforward,
   private val controller: () -> PIDController,
-  private val cameras: MutableList<VisionCamera> = mutableListOf()
+  private val cameras: MutableList<PhotonPoseEstimator> = mutableListOf()
 ) : HolonomicDrive, SubsystemBase(), Loggable {
   init {
     ahrs.calibrate()
@@ -176,10 +180,11 @@ open class MecanumDrive(
 
   private fun localize() {
     for (camera in cameras) {
-      if (camera.hasTarget()) {
+      val result = camera.update()
+      if (result.isPresent) {
         poseEstimator.addVisionMeasurement(
-          camera.camPose().toPose2d(),
-          camera.timestamp()
+          result.get().estimatedPose.toPose2d(),
+          result.get().timestampSeconds
         )
       }
     }
@@ -202,7 +207,7 @@ open class MecanumDrive(
         DriveConstants.MAX_ROT_SPEED,
         SimpleMotorFeedforward(DriveConstants.DRIVE_KS, DriveConstants.DRIVE_KV, DriveConstants.DRIVE_KA),
         { PIDController(DriveConstants.DRIVE_KP, DriveConstants.DRIVE_KI, DriveConstants.DRIVE_KD) },
-        mutableListOf(VisionCamera(DriveConstants.CAM_NAME, DriveConstants.ROBOT_TO_CAM, DriveConstants.TAG_LAYOUT))
+        DriveConstants.ESTIMATORS
       )
     }
   }
