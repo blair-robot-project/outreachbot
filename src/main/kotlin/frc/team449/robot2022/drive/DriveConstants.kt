@@ -2,11 +2,18 @@ package frc.team449.robot2022.drive
 
 import edu.wpi.first.apriltag.AprilTag
 import edu.wpi.first.apriltag.AprilTagFieldLayout
+import edu.wpi.first.math.Pair
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform3d
 import edu.wpi.first.math.util.Units
+import org.opencv.photo.Photo
+import org.photonvision.PhotonCamera
+import org.photonvision.PhotonPoseEstimator
+import org.photonvision.RobotPoseEstimator
+import org.photonvision.RobotPoseEstimator.PoseStrategy;
+
 
 object DriveConstants {
 
@@ -42,10 +49,22 @@ object DriveConstants {
   val CAM_NAME = "gloworm"
   val ROBOT_TO_CAM = Transform3d()
   val TAG_LAYOUT = AprilTagFieldLayout(listOf(AprilTag(0, Pose3d())), 16.4846, 8.1026)
+  val CAMERA = PhotonCamera(CAM_NAME)
 
   val GYRO_OFFSET = Rotation2d.fromDegrees(-180.0)
   val INITAL_POSE = Pose2d(0.0, 0.0, GYRO_OFFSET)
 
   val WHEELBASE = Units.inchesToMeters(21.426)
   val TRACKWIDTH = Units.inchesToMeters(21.000)
+
+  val ESTIMATORS = mutableListOf(
+    PhotonPoseEstimator(
+      TAG_LAYOUT,
+      PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY,
+      CAMERA,
+      ROBOT_TO_CAM
+    )
+  )
+
+
 }
