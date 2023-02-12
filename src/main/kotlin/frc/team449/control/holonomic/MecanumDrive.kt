@@ -5,7 +5,9 @@ import edu.wpi.first.math.Nat
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator
-import edu.wpi.first.math.geometry.*
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions
@@ -15,17 +17,12 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.robot2022.drive.DriveConstants
 import frc.team449.system.AHRS
-import frc.team449.system.VisionCamera
-// import frc.team449.system.VisionCamera
 import frc.team449.system.encoder.NEOEncoder
 import frc.team449.system.motor.WrappedMotor
 import frc.team449.system.motor.createSparkMax
 import io.github.oblarg.oblog.Loggable
 import io.github.oblarg.oblog.annotations.Log
-import org.photonvision.EstimatedRobotPose
 import org.photonvision.PhotonPoseEstimator
-import java.util.Optional
-import kotlin.reflect.typeOf
 
 /**
  * @param frontLeftMotor the front left motor
@@ -191,13 +188,27 @@ open class MecanumDrive(
   }
 
   companion object {
+    /** Helper method to create a motor for each wheel */
+    private fun createCorner(name: String, motorID: Int, inverted: Boolean): WrappedMotor {
+      return createSparkMax(
+        name,
+        motorID,
+        NEOEncoder.creator(
+          DriveConstants.DRIVE_UPR,
+          DriveConstants.DRIVE_GEARING
+        ),
+        inverted = inverted,
+        currentLimit = DriveConstants.CURRENT_LIM
+      )
+    }
+
     /** Create a new Mecanum Drive from DriveConstants */
     fun createMecanum(ahrs: AHRS): MecanumDrive {
       return MecanumDrive(
-        createSparkMax("frontLeft", DriveConstants.DRIVE_MOTOR_FL, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
-        createSparkMax("frontRight", DriveConstants.DRIVE_MOTOR_FR, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING), inverted = true),
-        createSparkMax("backLeft", DriveConstants.DRIVE_MOTOR_BL, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING)),
-        createSparkMax("backRight", DriveConstants.DRIVE_MOTOR_BR, NEOEncoder.creator(DriveConstants.DRIVE_UPR, DriveConstants.DRIVE_GEARING), inverted = true),
+        createCorner("frontLeft", DriveConstants.DRIVE_MOTOR_FL, false),
+        createCorner("frontRight", DriveConstants.DRIVE_MOTOR_FR, true),
+        createCorner("backLeft", DriveConstants.DRIVE_MOTOR_BL, false),
+        createCorner("backRight", DriveConstants.DRIVE_MOTOR_BR, true),
         Translation2d(DriveConstants.WHEELBASE / 2, DriveConstants.TRACKWIDTH / 2),
         Translation2d(DriveConstants.WHEELBASE / 2, -DriveConstants.TRACKWIDTH / 2),
         Translation2d(-DriveConstants.WHEELBASE / 2, DriveConstants.TRACKWIDTH / 2),

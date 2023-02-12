@@ -2,18 +2,13 @@ package frc.team449.robot2022.drive
 
 import edu.wpi.first.apriltag.AprilTag
 import edu.wpi.first.apriltag.AprilTagFieldLayout
-import edu.wpi.first.math.Pair
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform3d
 import edu.wpi.first.math.util.Units
-import org.opencv.photo.Photo
 import org.photonvision.PhotonCamera
 import org.photonvision.PhotonPoseEstimator
-import org.photonvision.RobotPoseEstimator
-import org.photonvision.RobotPoseEstimator.PoseStrategy;
-
 
 object DriveConstants {
 
@@ -40,6 +35,7 @@ object DriveConstants {
   const val MAX_ROT_SPEED = 2.5
   const val MAX_ATTAINABLE_MODULE_SPEED = (12 - DRIVE_KS) / DRIVE_KV
   const val MAX_ACCEL = 5.0
+  const val CURRENT_LIM = 40
 
   /** Controller Configurations */
   const val RATE_LIMIT = 1.5
@@ -65,6 +61,4 @@ object DriveConstants {
       ROBOT_TO_CAM
     )
   )
-
-
 }

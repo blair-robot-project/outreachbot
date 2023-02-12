@@ -44,7 +44,12 @@ class AutoDriveCommand<T : DriveSubsystem>(
   override fun execute() {
     val desiredState =
       drivetrain.set(
-        controller(drivetrain.pose, trajectory.sample(Timer.getFPGATimestamp() - startTime) as PathPlannerTrajectory.PathPlannerState)
+        controller(
+          drivetrain.pose,
+          trajectory.sample(
+            Timer.getFPGATimestamp() - startTime
+          ) as PathPlannerTrajectory.PathPlannerState
+        )
       )
   }
 
