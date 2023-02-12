@@ -4,7 +4,7 @@ bot used for outreach since 2022
 
 ## Workflows
 
-There are currently three workflows, `run-tests.yml` to run tests, `ktlint.yml` to check formatting, and `gen-docs.yml` to generate documentation. Here is how `gen-docs.yml` works:
+There are currently two workflows, `run-tests.yml` to run tests and `gen-docs.yml` to generate documentation. Here is how `gen-docs.yml` works:
 
 - It's triggered whenever you push to `main`
 - It runs `./gradlew dokkaHtml` to generate HTML from all our doc comments
