@@ -6,23 +6,26 @@ import edu.wpi.first.wpilibj.interfaces.Gyro
 import edu.wpi.first.wpilibj.simulation.SimDeviceSim
 import frc.team449.util.simBooleanProp
 import frc.team449.util.simDoubleProp
+import io.github.oblarg.oblog.Loggable
+import io.github.oblarg.oblog.annotations.Log
 
-class AHRS(private val navx: com.kauailabs.navx.frc.AHRS) : Gyro by navx {
-  private var headingOffset = 0.0
+class AHRS(private val navx: com.kauailabs.navx.frc.AHRS) : Gyro by navx, Loggable {
 
   /** The current reading of the gyro with the offset included */
-  var heading: Rotation2d
+  @get:Log.ToString
+  val heading: Rotation2d
     get() {
-      return -Rotation2d.fromDegrees(headingOffset + this.navx.fusedHeading)
-    }
-    set(newHeading) {
-      this.headingOffset = -newHeading.degrees - this.navx.fusedHeading
+      return -Rotation2d.fromDegrees(navx.fusedHeading.toDouble())
     }
 
-  constructor(port: SerialPort.Port = SerialPort.Port.kMXP) : this(com.kauailabs.navx.frc.AHRS(port))
+  constructor(
+    port: SerialPort.Port = SerialPort.Port.kMXP
+  ) : this(
+    com.kauailabs.navx.frc.AHRS(port)
+  )
 
-  override fun reset() {
-    heading = Rotation2d()
+  fun calibrated(): Boolean {
+    return navx.isMagnetometerCalibrated
   }
 
   override fun getAngle() = heading.degrees

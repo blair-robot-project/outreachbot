@@ -6,16 +6,16 @@ import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator
 import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds
-import edu.wpi.first.wpilibj.RobotBase.isSimulation
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.team449.robot2022.drive.DriveConstants
+import frc.team449.robot2023.constants.RobotConstants
+import frc.team449.robot2023.constants.drives.MecanumConstants
+import frc.team449.robot2023.constants.vision.VisionConstants
 import frc.team449.system.AHRS
 import frc.team449.system.encoder.NEOEncoder
 import frc.team449.system.motor.WrappedMotor
@@ -47,17 +47,14 @@ open class MecanumDrive(
   frontRightLocation: Translation2d,
   backLeftLocation: Translation2d,
   backRightLocation: Translation2d,
-  val ahrs: AHRS,
+  private val ahrs: AHRS,
   override val maxLinearSpeed: Double,
   override val maxRotSpeed: Double,
   private val feedForward: SimpleMotorFeedforward,
   private val controller: () -> PIDController,
-  private val cameras: MutableList<PhotonPoseEstimator> = mutableListOf()
+  private val cameras: List<PhotonPoseEstimator> = mutableListOf()
 ) : HolonomicDrive, SubsystemBase(), Loggable {
-  init {
-    ahrs.calibrate()
-    ahrs.reset()
-  }
+
   private val flController = controller()
   private val frController = controller()
   private val blController = controller()
@@ -73,19 +70,10 @@ open class MecanumDrive(
     kinematics,
     ahrs.heading,
     getPositions(),
-    Pose2d(),
-    MatBuilder(Nat.N3(), Nat.N1()).fill(.05, .05, .01), // [x, y, theta] other estimates
-    MatBuilder(Nat.N3(), Nat.N1()).fill(.025, .025, .015) // [x, y, theta] vision estimates
+    RobotConstants.INITIAL_POSE,
+    MatBuilder(Nat.N3(), Nat.N1()).fill(.005, .005, .0005), // [x, y, theta] other estimates
+    MatBuilder(Nat.N3(), Nat.N1()).fill(.005, .005, .0005) // [x, y, theta] vision estimates
   )
-
-  override var heading: Rotation2d
-    @Log.ToString(name = "Heading")
-    get() {
-      return ahrs.heading
-    }
-    set(value) {
-      ahrs.heading = value
-    }
 
   override var pose: Pose2d
     @Log.ToString(name = "Pose")
@@ -93,7 +81,7 @@ open class MecanumDrive(
       return this.poseEstimator.estimatedPosition
     }
     set(value) {
-      this.poseEstimator.resetPosition(heading, getPositions(), value)
+      this.poseEstimator.resetPosition(ahrs.heading, getPositions(), value)
     }
 
   @Log.ToString(name = "Desired Mecanum Speeds")
@@ -101,7 +89,7 @@ open class MecanumDrive(
 
   override fun set(desiredSpeeds: ChassisSpeeds) {
     desiredWheelSpeeds = kinematics.toWheelSpeeds(desiredSpeeds)
-    desiredWheelSpeeds.desaturate(DriveConstants.MAX_ATTAINABLE_MODULE_SPEED)
+    desiredWheelSpeeds.desaturate(MecanumConstants.MAX_ATTAINABLE_WHEEL_SPEED)
   }
 
   override fun stop() {
@@ -110,15 +98,6 @@ open class MecanumDrive(
 
   override fun periodic() {
     val currTime = Timer.getFPGATimestamp()
-    /**
-     * We cannot simulate the robot turning accurately,
-     * so just accumulate it to the heading based on the input omega(rad/s)
-     */
-    if (isSimulation()) {
-      this.heading =
-        this.heading.plus(Rotation2d(this.kinematics.toChassisSpeeds(desiredWheelSpeeds).omegaRadiansPerSecond * (currTime - lastTime)))
-      ahrs.heading = this.heading
-    }
 
     val frontLeftPID = flController.calculate(frontLeftMotor.velocity, desiredWheelSpeeds.frontLeftMetersPerSecond)
     val frontRightPID = frController.calculate(frontRightMotor.velocity, desiredWheelSpeeds.frontRightMetersPerSecond)
@@ -146,7 +125,7 @@ open class MecanumDrive(
     if (cameras.isNotEmpty()) localize()
 
     this.poseEstimator.update(
-      heading,
+      ahrs.heading,
       getPositions()
     )
 
@@ -188,37 +167,38 @@ open class MecanumDrive(
   }
 
   companion object {
+
     /** Helper method to create a motor for each wheel */
     private fun createCorner(name: String, motorID: Int, inverted: Boolean): WrappedMotor {
       return createSparkMax(
         name,
         motorID,
         NEOEncoder.creator(
-          DriveConstants.DRIVE_UPR,
-          DriveConstants.DRIVE_GEARING
+          MecanumConstants.DRIVE_UPR,
+          MecanumConstants.DRIVE_GEARING
         ),
         inverted = inverted,
-        currentLimit = DriveConstants.CURRENT_LIM
+        currentLimit = MecanumConstants.CURRENT_LIM
       )
     }
 
     /** Create a new Mecanum Drive from DriveConstants */
     fun createMecanum(ahrs: AHRS): MecanumDrive {
       return MecanumDrive(
-        createCorner("frontLeft", DriveConstants.DRIVE_MOTOR_FL, false),
-        createCorner("frontRight", DriveConstants.DRIVE_MOTOR_FR, true),
-        createCorner("backLeft", DriveConstants.DRIVE_MOTOR_BL, false),
-        createCorner("backRight", DriveConstants.DRIVE_MOTOR_BR, true),
-        Translation2d(DriveConstants.WHEELBASE / 2, DriveConstants.TRACKWIDTH / 2),
-        Translation2d(DriveConstants.WHEELBASE / 2, -DriveConstants.TRACKWIDTH / 2),
-        Translation2d(-DriveConstants.WHEELBASE / 2, DriveConstants.TRACKWIDTH / 2),
-        Translation2d(-DriveConstants.WHEELBASE / 2, -DriveConstants.TRACKWIDTH / 2),
+        createCorner("frontLeft", MecanumConstants.DRIVE_MOTOR_FL, false),
+        createCorner("frontRight", MecanumConstants.DRIVE_MOTOR_FR, true),
+        createCorner("backLeft", MecanumConstants.DRIVE_MOTOR_BL, false),
+        createCorner("backRight", MecanumConstants.DRIVE_MOTOR_BR, true),
+        Translation2d(MecanumConstants.WHEELBASE / 2, MecanumConstants.TRACKWIDTH / 2),
+        Translation2d(MecanumConstants.WHEELBASE / 2, -MecanumConstants.TRACKWIDTH / 2),
+        Translation2d(-MecanumConstants.WHEELBASE / 2, MecanumConstants.TRACKWIDTH / 2),
+        Translation2d(-MecanumConstants.WHEELBASE / 2, -MecanumConstants.TRACKWIDTH / 2),
         ahrs,
-        DriveConstants.MAX_LINEAR_SPEED,
-        DriveConstants.MAX_ROT_SPEED,
-        SimpleMotorFeedforward(DriveConstants.DRIVE_KS, DriveConstants.DRIVE_KV, DriveConstants.DRIVE_KA),
-        { PIDController(DriveConstants.DRIVE_KP, DriveConstants.DRIVE_KI, DriveConstants.DRIVE_KD) },
-        DriveConstants.ESTIMATORS
+        RobotConstants.MAX_LINEAR_SPEED,
+        RobotConstants.MAX_ROT_SPEED,
+        SimpleMotorFeedforward(MecanumConstants.DRIVE_KS, MecanumConstants.DRIVE_KV, MecanumConstants.DRIVE_KA),
+        { PIDController(MecanumConstants.DRIVE_KP, MecanumConstants.DRIVE_KI, MecanumConstants.DRIVE_KD) },
+        VisionConstants.ESTIMATORS
       )
     }
   }
