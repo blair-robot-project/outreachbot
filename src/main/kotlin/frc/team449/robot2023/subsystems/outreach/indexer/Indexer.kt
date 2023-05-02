@@ -8,8 +8,7 @@ class Indexer(
   private val indexMotor: WrappedMotor,
 ): SubsystemBase() {
 
-  fun runIndexer(): Command {
-    return this.runOnce { indexMotor.setVoltage(IndexerConstants.DESIRED_VOLTAGE) }
+  init {
+    indexMotor.setVoltage(IndexerConstants.DESIRED_VOLTAGE)
   }
-
 }

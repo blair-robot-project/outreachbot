@@ -12,22 +12,21 @@ class ControllerBindings(
 ) {
 
   fun bindButtons() {
-
-
     JoystickButton(controller, XboxController.Button.kA.value).onTrue(
-      InstantCommand(robot.intake::runIntakeForward).andThen(
-        InstantCommand(robot.shooter::runShooter)
+      robot.intake.runIntakeForward().andThen(
+        robot.shooter.runShooter()
+      )).onFalse(
+        robot.intake.stopIntake().andThen(
+          robot.shooter.stopShooter()
+        )
       )
-    ).onFalse(
-      InstantCommand(robot.shooter::stopShooter).andThen(
-        InstantCommand(robot.intake::stopIntake)
-      )
-    )
 
     JoystickButton(controller, XboxController.Button.kX.value).onTrue(
       InstantCommand(robot.intake::runIntakeForward)
     ).onFalse(
       InstantCommand(robot.intake::stopIntake)
     )
+
+
   }
 }

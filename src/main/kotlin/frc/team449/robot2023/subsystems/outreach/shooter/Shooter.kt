@@ -2,6 +2,7 @@ package frc.team449.robot2023.subsystems.outreach.shooter
 
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.team449.system.motor.WrappedMotor
 import io.github.oblarg.oblog.Loggable
@@ -29,24 +30,21 @@ class Shooter(
   private var shooterSpeed = 0.0
 
   // Starts the shooter by changing runShoot to true.
-  fun runShooter() {
-    runShoot = true
+  fun runShooter(): Command {
+    return this.runOnce {runShoot = true}
   }
 
   // Stops the shooter by changing runShoot to false.
-  fun stopShooter() {
-    runShoot = false
+  fun stopShooter(): Command {
+    return this.runOnce {runShoot = false}
   }
 
   fun runShooterReverse() {
     shooterMotor.setVoltage(-7.0)
   }
 
-  private fun shooterAtSpeed(desiredSpeed: Double): Boolean {
-    if (abs(shooterMotor.encoder.velocity - desiredSpeed) <= ShooterConstants.TOLERANCE) {
-      return true
-    }
-    return false
+  private fun shooterAtSpeed(desiredSpeed: Double = ShooterConstants.SHOOTER_VEL): Boolean {
+    return abs(shooterMotor.velocity - desiredSpeed) <= ShooterConstants.TOLERANCE
   }
 
   // Uses PID and FF to calculate motor voltage.
@@ -58,7 +56,7 @@ class Shooter(
       val shooterFF = shooterFF.calculate(ShooterConstants.SHOOTER_VEL)
 
       shooterMotor.setVoltage(shooterPID + shooterFF)
-      if (shooterAtSpeed(ShooterConstants.SHOOTER_VEL)) {
+      if (shooterAtSpeed()) {
         feederMotor.setVoltage(ShooterConstants.FEEDER_VOLTAGE)
       }
     } else {
