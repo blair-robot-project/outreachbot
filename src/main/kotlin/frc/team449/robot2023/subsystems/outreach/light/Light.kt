@@ -2,24 +2,36 @@ package frc.team449.robot2023.subsystems.outreach.light
 
 import edu.wpi.first.wpilibj.AddressableLED
 import edu.wpi.first.wpilibj.AddressableLEDBuffer
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.util.Color
 import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 
 class Light(
-  private val port: Int,
-  private val length: Int
+  port: Int,
+  length: Int
 ): SubsystemBase() {
 
   private var strip = AddressableLED(port)
   var buffer = AddressableLEDBuffer(length)
+  val colorChooser: SendableChooser<Color> = SendableChooser()
 
   init {
+    colorChooser.setDefaultOption("Red", Color.kRed)
+    setColorOptions(listOf(Color.kOrange, Color.kYellow, Color.kGreen, Color.kBlue, Color.kIndigo, Color.kViolet))
+    SmartDashboard.putData("LED Colors", colorChooser)
     strip.setLength(buffer.length)
-    strip.setData(buffer)
     strip.start()
   }
+
+
+  private fun setColorOptions(colors: List<Color>) {
+    for (color in colors) {
+      colorChooser.addOption(color.toString().substring(1), color)
+    }
+  }
+
 
   fun setSolidColor(color: Color): Command {
     return this.runOnce {

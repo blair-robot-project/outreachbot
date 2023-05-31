@@ -10,8 +10,4 @@ abstract class RobotBase {
   val field = Field2d()
 
   abstract val powerDistribution: PowerDistribution
-
-  abstract val drive: HolonomicDrive
-
-  abstract val oi: OI
 }

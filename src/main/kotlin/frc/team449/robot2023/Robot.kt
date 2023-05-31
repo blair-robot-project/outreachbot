@@ -16,20 +16,9 @@ class Robot : RobotBase() {
 
   val driveController = XboxController(0)
 
-  private val ahrs = AHRS(SerialPort.Port.kMXP)
-
   // Instantiate/declare PDP and other stuff here
 
   override val powerDistribution: PowerDistribution = PowerDistribution(RobotConstants.PDP_CAN, PowerDistribution.ModuleType.kCTRE)
-
-  override val drive = createMecanum(ahrs)
-
-  @Log(name = "Joystick Input")
-  override val oi = createHolonomicOI(drive, driveController)
-
-//  val indexer = createIndexer()
-//  val intake = createIntake()
-//  val shooter = createShooter()
 
   val light = createLight()
 
