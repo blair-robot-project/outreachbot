@@ -46,14 +46,13 @@ class RobotLoop : TimedRobot() {
     SmartDashboard.putData("Auto Chooser", autoChooser)
 
     ControllerBindings(robot.driveController, robot).bindButtons()
+    SmartDashboard.putData("LED Colors", robot.light.colorChooser)
   }
 
   override fun robotPeriodic() {
     CommandScheduler.getInstance().run()
 
     Logger.updateEntries()
-
-    CommandScheduler.getInstance().schedule(SolidColor(robot.light, robot.light.colorChooser.selected))
   }
 
   override fun autonomousInit() {
@@ -65,6 +64,7 @@ class RobotLoop : TimedRobot() {
   }
 
   override fun teleopPeriodic() {
+    CommandScheduler.getInstance().schedule(SolidColor(robot.light, robot.light.colorChooser.selected))
   }
 
   override fun disabledInit() {
