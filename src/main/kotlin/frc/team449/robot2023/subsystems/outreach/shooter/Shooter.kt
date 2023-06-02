@@ -25,18 +25,18 @@ class Shooter(
   @Log.Graph
   private var shooterSpeed = 0.0
 
-  fun runShooter() {
-    runShoot = true
+  fun runShooter(): Command {
+    return this.runOnce {runShoot = true}
   }
 
 
-  fun stopShooter() {
-    runShoot = false
+  fun stopShooter(): Command {
+    return this.runOnce {runShoot = false}
   }
 
 
-  fun runShooterReverse() {
-    shooterMotor.setVoltage(-7.0)
+  fun runShooterReverse(): Command {
+    return this.runOnce {shooterMotor.setVoltage(-7.0)}
   }
 
 
