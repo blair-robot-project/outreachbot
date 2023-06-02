@@ -11,18 +11,18 @@ class Intake(
 ) : SubsystemBase() {
 
   // Run intake motor forwards.
-  fun runIntakeForward(): Command {
-    return this.runOnce {intakeMotor.setVoltage(IntakeConstants.INTAKE_VOLTAGE)}
+  fun runIntakeForward() {
+    intakeMotor.setVoltage(IntakeConstants.INTAKE_VOLTAGE)
   }
 
   // Run intake motor in reverse.
-  fun runIntakeReverse(): Command {
-    return this.runOnce {intakeMotor.setVoltage(-IntakeConstants.INTAKE_VOLTAGE)}
+  fun runIntakeReverse() {
+    intakeMotor.setVoltage(-IntakeConstants.INTAKE_VOLTAGE)
   }
 
   // Stop intake motor.
-  fun stopIntake(): Command {
-    return this.runOnce {intakeMotor.stopMotor()}
+  fun stopIntake() {
+    intakeMotor.stopMotor()
   }
 
   companion object {

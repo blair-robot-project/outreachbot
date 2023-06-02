@@ -13,7 +13,9 @@ class ControllerBindings(
 
   fun bindButtons() {
     JoystickButton(controller, XboxController.Button.kA.value).whileTrue(
-      robot.shooter.runShooter()
+      InstantCommand(robot.shooter::runShooter)
+    ).onFalse(
+      InstantCommand(robot.shooter::stopShooter)
     )
   }
 }
