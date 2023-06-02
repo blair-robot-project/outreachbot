@@ -7,8 +7,10 @@ import frc.team449.RobotBase
 import frc.team449.control.holonomic.MecanumDrive.Companion.createMecanum
 import frc.team449.control.holonomic.OIHolonomic.Companion.createHolonomicOI
 import frc.team449.robot2023.constants.RobotConstants
-import frc.team449.robot2023.subsystems.outreach.light.Light
+import frc.team449.robot2023.subsystems.outreach.indexer.Indexer.Companion.createIndexer
+import frc.team449.robot2023.subsystems.outreach.intake.Intake.Companion.createIntake
 import frc.team449.robot2023.subsystems.outreach.light.Light.Companion.createLight
+import frc.team449.robot2023.subsystems.outreach.shooter.Shooter.Companion.createShooter
 import frc.team449.system.AHRS
 import io.github.oblarg.oblog.annotations.Log
 
@@ -27,10 +29,9 @@ class Robot : RobotBase() {
   @Log(name = "Joystick Input")
   override val oi = createHolonomicOI(drive, driveController)
 
-//  val indexer = createIndexer()
-//  val intake = createIntake()
-//  val shooter = createShooter()
-
   val light = createLight()
 
+  val indexer = createIndexer()
+  val intake = createIntake()
+  val shooter = createShooter(light)
 }

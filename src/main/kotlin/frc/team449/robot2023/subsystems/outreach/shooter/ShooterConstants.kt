@@ -25,5 +25,5 @@ object ShooterConstants {
 
   const val SHOOTER_VEL = 52.5 // TODO - test for the values
   const val DELTA_TIME = 0.02 // TODO - test for the values
-  const val TOLERANCE = 0.25 // TODO - test for the values
+  const val TOLERANCE = 0.05 // TODO - test for the values
 }

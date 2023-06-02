@@ -43,8 +43,6 @@ class RobotLoop : TimedRobot() {
     SmartDashboard.putData("Auto Chooser", autoChooser)
 
     ControllerBindings(robot.driveController, robot).bindButtons()
-
-    robot.light.defaultCommand = SolidColor(robot.light, Color.kAqua)
   }
 
   override fun robotPeriodic() {
