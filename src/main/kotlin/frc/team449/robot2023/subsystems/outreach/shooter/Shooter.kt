@@ -18,7 +18,6 @@ class Shooter(
   private val feederMotor: WrappedMotor,
   private val shooterController: PIDController,
   private val shooterFF: SimpleMotorFeedforward,
-  private val light: Light
 ) : SubsystemBase(), Loggable {
 
   private var runShoot = false
@@ -39,6 +38,10 @@ class Shooter(
     return this.runOnce {shooterMotor.setVoltage(-7.0)}
   }
 
+  fun getShooterVelocity(): Double {
+    return shooterMotor.velocity
+  }
+
 
   override fun periodic() {
     if (runShoot) {
@@ -46,8 +49,6 @@ class Shooter(
       val shooterFF = shooterFF.calculate(ShooterConstants.SHOOTER_VEL)
 
       shooterMotor.setVoltage(shooterPID + shooterFF)
-
-      ShooterLEDBar(this.light, shooterMotor.velocity / ShooterConstants.SHOOTER_VEL)
 
       if (shooterController.atSetpoint()) {
         feederMotor.setVoltage(ShooterConstants.FEEDER_VOLTAGE)
@@ -60,7 +61,7 @@ class Shooter(
 
 
   companion object {
-    fun createShooter(light: Light): Shooter {
+    fun createShooter(): Shooter {
       val shooterMotor = createSparkMax(
         "Shooter",
         ShooterConstants.SHOOTER_ID,
@@ -91,7 +92,6 @@ class Shooter(
         feederMotor,
         shooterPID,
         shooterFF,
-        light
       )
     }
   }

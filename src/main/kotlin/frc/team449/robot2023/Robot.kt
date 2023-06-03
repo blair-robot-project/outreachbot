@@ -29,9 +29,9 @@ class Robot : RobotBase() {
   @Log(name = "Joystick Input")
   override val oi = createHolonomicOI(drive, driveController)
 
-  val light = createLight()
-
   val indexer = createIndexer()
   val intake = createIntake()
-  val shooter = createShooter(light)
+  val shooter = createShooter()
+
+  val light = createLight()
 }

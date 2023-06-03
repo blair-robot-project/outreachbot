@@ -12,6 +12,7 @@ import frc.team449.control.DriveCommand
 import frc.team449.robot2023.Robot
 import frc.team449.robot2023.auto.AutoChooser
 import frc.team449.robot2023.auto.Paths
+import frc.team449.robot2023.commands.light.ShooterLEDBar
 import frc.team449.robot2023.commands.light.SolidColor
 import frc.team449.robot2023.subsystems.ControllerBindings
 import io.github.oblarg.oblog.Logger
@@ -69,6 +70,7 @@ class RobotLoop : TimedRobot() {
       CommandScheduler.getInstance().cancel(autoCommand)
     }
     robot.drive.defaultCommand = DriveCommand(robot.drive, robot.oi)
+    CommandScheduler.getInstance().schedule(ShooterLEDBar(robot.light, robot.shooter))
   }
 
   override fun teleopPeriodic() {
