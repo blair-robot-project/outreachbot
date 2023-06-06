@@ -3,15 +3,14 @@ package frc.team449.robot2023.subsystems.outreach.shooter
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.InstantCommand
+import edu.wpi.first.wpilibj2.command.RepeatCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.team449.robot2023.commands.light.ShooterLEDBar
-import frc.team449.robot2023.subsystems.outreach.light.Light
 import frc.team449.system.encoder.NEOEncoder
 import frc.team449.system.motor.WrappedMotor
 import frc.team449.system.motor.createSparkMax
 import io.github.oblarg.oblog.Loggable
 import io.github.oblarg.oblog.annotations.Log
-import kotlin.math.abs
 
 class Shooter(
   private val shooterMotor: WrappedMotor,
@@ -20,45 +19,35 @@ class Shooter(
   private val shooterFF: SimpleMotorFeedforward,
 ) : SubsystemBase(), Loggable {
 
-  private var runShoot = false
-  @Log.Graph
-  private var shooterSpeed = 0.0
+  @get:Log.Graph
+  val currVel: Double
+    get() = shooterMotor.velocity
+
+  var runShoot = false
 
   fun runShooter(): Command {
-    return this.runOnce {runShoot = true}
-  }
+    runShoot = true
+    return RepeatCommand(
+      InstantCommand({
+        val shooterPID = shooterController.calculate(currVel, ShooterConstants.SHOOTER_VEL)
+        val shooterFF = shooterFF.calculate(ShooterConstants.SHOOTER_VEL)
 
+        shooterMotor.setVoltage(shooterPID + shooterFF)
+
+        if (shooterController.atSetpoint()) {
+          feederMotor.setVoltage(ShooterConstants.FEEDER_VOLTAGE)
+        }
+      })
+    )
+  }
 
   fun stopShooter(): Command {
-    return this.runOnce {runShoot = false}
-  }
-
-
-  fun runShooterReverse(): Command {
-    return this.runOnce {shooterMotor.setVoltage(-7.0)}
-  }
-
-  fun getShooterVelocity(): Double {
-    return shooterMotor.velocity
-  }
-
-
-  override fun periodic() {
-    if (runShoot) {
-      val shooterPID = shooterController.calculate(shooterMotor.velocity, ShooterConstants.SHOOTER_VEL)
-      val shooterFF = shooterFF.calculate(ShooterConstants.SHOOTER_VEL)
-
-      shooterMotor.setVoltage(shooterPID + shooterFF)
-
-      if (shooterController.atSetpoint()) {
-        feederMotor.setVoltage(ShooterConstants.FEEDER_VOLTAGE)
-      }
-    } else {
+    runShoot = false
+    return InstantCommand({
       shooterMotor.stopMotor()
       feederMotor.stopMotor()
-    }
+    })
   }
-
 
   companion object {
     fun createShooter(): Shooter {
