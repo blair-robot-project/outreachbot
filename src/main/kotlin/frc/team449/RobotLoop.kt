@@ -1,16 +1,12 @@
 package frc.team449
 
-import com.pathplanner.lib.server.PathPlannerServer
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.TimedRobot
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.team449.control.DriveCommand
 import frc.team449.robot2023.Robot
-import frc.team449.robot2023.auto.AutoChooser
-import frc.team449.robot2023.auto.Paths
 import frc.team449.robot2023.subsystems.ControllerBindings
 import io.github.oblarg.oblog.Logger
 
@@ -18,14 +14,13 @@ import io.github.oblarg.oblog.Logger
 class RobotLoop : TimedRobot() {
 
   private val robot = Robot()
-  private var autoChooser: AutoChooser = AutoChooser(robot)
   private var autoCommand: Command? = null
 
   override fun robotInit() {
     // Yes this should be a print statement, it's useful to know that robotInit started.
     println("Started robotInit.")
 
-    if (RobotBase.isSimulation()) {
+    if (isSimulation()) {
       // Don't complain about joysticks if there aren't going to be any
       DriverStation.silenceJoystickConnectionWarning(true)
 //      val instance = NetworkTableInstance.getDefault()
@@ -33,12 +28,8 @@ class RobotLoop : TimedRobot() {
 //      instance.startClient4("localhost")
     }
 
-    PathPlannerServer.startServer(5811)
-
     Logger.configureLoggingAndConfig(robot, false)
-    Logger.configureLoggingAndConfig(Paths, false)
     SmartDashboard.putData("Field", robot.field)
-    SmartDashboard.putData("Auto Chooser", autoChooser)
 
     ControllerBindings(robot.driveController, robot).bindButtons()
   }
@@ -52,12 +43,6 @@ class RobotLoop : TimedRobot() {
   }
 
   override fun autonomousInit() {
-    /** Every time auto starts, we update the chosen auto command */
-    val cmd = autoChooser.selected
-    if (cmd != null) {
-      this.autoCommand = cmd
-      CommandScheduler.getInstance().schedule(this.autoCommand)
-    }
   }
 
   override fun autonomousPeriodic() {}

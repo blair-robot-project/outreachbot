@@ -8,7 +8,7 @@ import frc.team449.system.motor.createSparkMax
 
 class Indexer(
   private val indexMotor: WrappedMotor,
-): SubsystemBase() {
+) : SubsystemBase() {
 
   init {
     indexMotor.setVoltage(IndexerConstants.DESIRED_VOLTAGE)
@@ -26,5 +26,4 @@ class Indexer(
       return Indexer(indexerMotor)
     }
   }
-
 }

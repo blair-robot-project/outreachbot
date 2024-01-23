@@ -12,17 +12,17 @@ class Intake(
 
   // Run intake motor forwards.
   fun runIntakeForward(): Command {
-    return this.runOnce {intakeMotor.setVoltage(IntakeConstants.INTAKE_VOLTAGE)}
+    return this.runOnce { intakeMotor.setVoltage(IntakeConstants.INTAKE_VOLTAGE) }
   }
 
   // Run intake motor in reverse.
   fun runIntakeReverse(): Command {
-    return this.runOnce {intakeMotor.setVoltage(-IntakeConstants.INTAKE_VOLTAGE)}
+    return this.runOnce { intakeMotor.setVoltage(-IntakeConstants.INTAKE_VOLTAGE) }
   }
 
   // Stop intake motor.
   fun stopIntake(): Command {
-    return this.runOnce {intakeMotor.stopMotor()}
+    return this.runOnce { intakeMotor.stopMotor() }
   }
 
   companion object {

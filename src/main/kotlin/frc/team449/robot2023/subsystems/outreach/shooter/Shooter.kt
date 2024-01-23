@@ -24,12 +24,12 @@ class Shooter(
 
   // Starts the shooter by changing runShoot to true.
   fun runShooter(): Command {
-    return this.runOnce {runShoot = true}
+    return this.runOnce { runShoot = true }
   }
 
   // Stops the shooter by changing runShoot to false.
   fun stopShooter(): Command {
-    return this.runOnce {runShoot = false}
+    return this.runOnce { runShoot = false }
   }
 
   fun runShooterReverse() {
@@ -58,7 +58,6 @@ class Shooter(
       feederMotor.stopMotor()
     }
   }
-
 
   companion object {
     fun createShooter(): Shooter {
